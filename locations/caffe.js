@@ -16,6 +16,22 @@ const orderButton = document.getElementById("order-button");
 
 const lessonPopup = document.getElementById("lesson-popup");
 const popupInstruction = document.getElementById("popup-instruction");
+const baristaBubble = document.getElementById("barista-bubble");
+let baristaBubbleTimer = null;
+
+function showBaristaBubble() {
+  if (!baristaBubble) return;
+
+  baristaBubble.hidden = false;
+  if (baristaBubbleTimer) {
+    clearTimeout(baristaBubbleTimer);
+  }
+
+  baristaBubbleTimer = setTimeout(() => {
+    baristaBubble.hidden = true;
+    baristaBubbleTimer = null;
+  }, 3200);
+}
 
 function setFeedback(message, type = "") {
   feedbackEl.textContent = message;
@@ -64,6 +80,10 @@ function finishGame() {
 }
 
 function handleHotspotTap(objectId) {
+  if (objectId === "barista") {
+    showBaristaBubble();
+  }
+
   if (!gameActive) {
     setFeedback("Press Order Coffee first.", "wrong");
     return;

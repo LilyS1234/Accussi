@@ -11,6 +11,9 @@ const vocabulary = {
 };
 
 const providedSceneImage = "assets/images/scenes/village-map-provided.png";
+const introSceneId = "flight-to-sicily";
+let introTimer = null;
+let introFlightAudio = null;
 
 const sceneTemplate = (id, name, description, image, vocabId) => ({
   id,
@@ -24,6 +27,18 @@ const sceneTemplate = (id, name, description, image, vocabId) => ({
 });
 
 const scenes = {
+  [introSceneId]: {
+    id: introSceneId,
+    name: "Flight to Sicily",
+    description: "A playful takeoff scene before arriving in Accussi.",
+    backgroundImage: [
+      "linear-gradient(180deg, #6ec8ff 0%, #7fd5ff 34%, #bfe9ff 100%)",
+      "radial-gradient(circle at 20% 25%, rgba(255, 255, 255, 0.5) 0 18%, transparent 50%)",
+      "radial-gradient(circle at 72% 40%, rgba(255, 255, 255, 0.45) 0 16%, transparent 46%)",
+    ],
+    hotspots: [],
+    isIntro: true,
+  },
   map: {
     id: "map",
     name: "The Village of Accussi",
@@ -53,7 +68,7 @@ const scenes = {
 };
 
 const storageKey = "accussi_learning_state";
-const appState = { currentSceneId: "map", learningState: loadLearningState() };
+const appState = { currentSceneId: introSceneId, learningState: loadLearningState() };
 
 const sceneBackgroundEl = document.getElementById("scene-background");
 const hotspotLayerEl = document.getElementById("hotspot-layer");
@@ -63,6 +78,14 @@ renderSceneNav();
 renderScene();
 
 function renderSceneNav() {
+  const isIntroScene = Boolean(scenes[appState.currentSceneId]?.isIntro);
+  sceneNavEl.classList.toggle("hidden", isIntroScene);
+
+  if (isIntroScene) {
+    sceneNavEl.innerHTML = "";
+    return;
+  }
+
   sceneNavEl.innerHTML = "";
 
   const mapButton = document.createElement("button");
@@ -74,7 +97,7 @@ function renderSceneNav() {
   sceneNavEl.appendChild(mapButton);
 
   Object.values(scenes)
-    .filter((scene) => scene.id !== "map")
+    .filter((scene) => scene.id !== "map" && !scene.isIntro)
     .forEach((scene) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -88,6 +111,11 @@ function renderSceneNav() {
 
 function setScene(sceneId) {
   if (!scenes[sceneId]) return;
+  if (introTimer) {
+    clearTimeout(introTimer);
+    introTimer = null;
+  }
+  if (sceneId !== introSceneId) stopIntroFlightSound();
   appState.currentSceneId = sceneId;
   renderScene();
   renderSceneNav();
@@ -98,7 +126,13 @@ function renderScene() {
   if (!scene) return;
   sceneBackgroundEl.style.backgroundImage = buildBackgroundImage(scene.backgroundImage);
   hotspotLayerEl.classList.toggle("map-hotspots", scene.id === "map");
+  hotspotLayerEl.classList.toggle("intro-hotspots", Boolean(scene.isIntro));
   hotspotLayerEl.innerHTML = "";
+
+  if (scene.isIntro) {
+    renderIntroScene();
+    return;
+  }
 
   scene.hotspots.forEach((hotspot) => {
     const button = document.createElement("button");
@@ -120,9 +154,132 @@ function renderScene() {
   });
 }
 
+function renderIntroScene() {
+  startIntroFlightSound();
+
+  const cloudPositions = [
+    { left: 8, top: 16, delay: "0s" },
+    { left: 28, top: 30, delay: "0.5s" },
+    { left: 52, top: 18, delay: "1s" },
+    { left: 74, top: 34, delay: "1.4s" },
+    { left: 18, top: 54, delay: "1.8s" },
+    { left: 66, top: 58, delay: "2.3s" },
+  ];
+
+  cloudPositions.forEach((cloud) => {
+    const cloudEl = document.createElement("span");
+    cloudEl.className = "intro-cloud";
+    cloudEl.textContent = "☁️";
+    cloudEl.style.left = `${cloud.left}%`;
+    cloudEl.style.top = `${cloud.top}%`;
+    cloudEl.style.animationDelay = cloud.delay;
+    hotspotLayerEl.appendChild(cloudEl);
+  });
+
+  const planeWrap = document.createElement("div");
+  planeWrap.className = "intro-plane-wrap";
+
+  const speechBubble = document.createElement("div");
+  speechBubble.className = "intro-bubble";
+  speechBubble.textContent = "Passengers, this is your captain speaking: Sicily ahead — prepare for landing in Accussi!";
+  planeWrap.appendChild(speechBubble);
+
+  const plane = document.createElement("span");
+  plane.className = "intro-plane";
+  plane.textContent = "✈️";
+  planeWrap.appendChild(plane);
+
+  hotspotLayerEl.appendChild(planeWrap);
+
+  const skipButton = document.createElement("button");
+  skipButton.type = "button";
+  skipButton.className = "intro-skip";
+  skipButton.textContent = "Skip flight";
+  skipButton.addEventListener("click", () => setScene("map"));
+  hotspotLayerEl.appendChild(skipButton);
+
+  introTimer = setTimeout(() => {
+    if (appState.currentSceneId === introSceneId) setScene("map");
+  }, 6800);
+}
+
+function startIntroFlightSound() {
+  if (introFlightAudio) return;
+
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    const context = new AudioCtx();
+    const masterGain = context.createGain();
+    masterGain.gain.value = 0.03;
+    masterGain.connect(context.destination);
+
+    const engine = context.createOscillator();
+    engine.type = "sawtooth";
+    engine.frequency.value = 78;
+
+    const harmonics = context.createOscillator();
+    harmonics.type = "triangle";
+    harmonics.frequency.value = 156;
+
+    const wobble = context.createOscillator();
+    wobble.type = "sine";
+    wobble.frequency.value = 0.22;
+
+    const wobbleDepth = context.createGain();
+    wobbleDepth.gain.value = 7;
+
+    wobble.connect(wobbleDepth);
+    wobbleDepth.connect(engine.frequency);
+    wobbleDepth.connect(harmonics.frequency);
+
+    engine.connect(masterGain);
+    harmonics.connect(masterGain);
+
+    engine.start();
+    harmonics.start();
+    wobble.start();
+
+    introFlightAudio = { context, engine, harmonics, wobble, masterGain };
+
+    if (context.state === "suspended") {
+      const resumeAudio = () => {
+        context.resume().catch(() => {});
+        window.removeEventListener("pointerdown", resumeAudio);
+      };
+
+      window.addEventListener("pointerdown", resumeAudio, { once: true });
+    }
+  } catch {
+    introFlightAudio = null;
+  }
+}
+
+function stopIntroFlightSound() {
+  if (!introFlightAudio) return;
+
+  const { engine, harmonics, wobble, masterGain, context } = introFlightAudio;
+  const now = context.currentTime;
+  masterGain.gain.cancelScheduledValues(now);
+  masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+  masterGain.gain.linearRampToValueAtTime(0.0001, now + 0.25);
+
+  const stopAt = now + 0.26;
+  engine.stop(stopAt);
+  harmonics.stop(stopAt);
+  wobble.stop(stopAt);
+
+  setTimeout(() => {
+    context.close().catch(() => {});
+  }, 320);
+
+  introFlightAudio = null;
+}
+
 function buildBackgroundImage(backgroundImage) {
   const imageList = Array.isArray(backgroundImage) ? backgroundImage : [backgroundImage];
-  return imageList.map((imagePath) => `url(${imagePath})`).join(", ");
+  return imageList.map((imagePath) => (imagePath.startsWith("linear-gradient") || imagePath.startsWith("radial-gradient") ? imagePath : `url(${imagePath})`)).join(", ");
 }
 
 function onHotspotInteract(hotspot) {
@@ -136,7 +293,6 @@ function onHotspotInteract(hotspot) {
   state.lastSeen = Date.now();
   appState.learningState[hotspot.vocabId] = state;
   persistLearningState(appState.learningState);
-
 
   playAudio(vocab.audio);
 }

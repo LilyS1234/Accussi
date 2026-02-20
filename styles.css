@@ -19,9 +19,7 @@ body {
 }
 
 .app { max-width: 1080px; margin: 0 auto; padding: 1.25rem; display: grid; gap: 1rem; }
-.scene-header, .interaction-panel, .scene-nav { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 0.9rem 1rem; }
-#scene-name { margin: 0; font-size: clamp(1.5rem, 2.2vw, 2.1rem); }
-#scene-description { margin: 0.5rem 0 0; opacity: 0.9; }
+.scene-nav { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 0.9rem 1rem; }
 
 .scene-stage { position: relative; min-height: 620px; aspect-ratio: 3 / 2; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
 .scene-background { position: absolute; inset: 0; background-size: cover; background-position: center; }
@@ -52,8 +50,6 @@ body {
   padding: 0.1rem 0.45rem;
 }
 
-.panel-title { margin: 0 0 0.45rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
-.panel-copy { margin: 0; line-height: 1.45; }
 .scene-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .scene-button { border: 1px solid rgba(0, 0, 0, 0.2); background: #fff; color: var(--text); border-radius: 999px; padding: 0.4rem 0.75rem; font: inherit; }
 .scene-button.active { border-color: var(--accent); background: var(--accent-soft); }

@@ -10,6 +10,8 @@ const vocabulary = {
   littra: { sicilian: "a littra", english: "the letter", audio: "assets/audio/littra.mp3" },
 };
 
+const providedSceneImage = "assets/images/scenes/village-map-provided.png";
+
 const sceneTemplate = (id, name, description, image, vocabId) => ({
   id,
   name,
@@ -26,10 +28,7 @@ const scenes = {
     id: "map",
     name: "The Village of Accussi",
     description: "Choose a place in the village map to begin your scene.",
-    backgroundImage: [
-      "assets/images/scenes/village-map-provided.png",
-      "assets/images/scenes/village-map.svg",
-    ],
+    backgroundImage: providedSceneImage,
     hotspots: [
       { type: "scene", targetSceneId: "lemon-grove", label: "U Giardini di Limuna", left: 6, top: 16, width: 25, height: 19 },
       { type: "scene", targetSceneId: "vineyard", label: "A Vigna", left: 35, top: 16, width: 22, height: 20 },
@@ -42,25 +41,22 @@ const scenes = {
       { type: "scene", targetSceneId: "posta", label: "La Posta", left: 52, top: 48, width: 10, height: 12 },
     ],
   },
-  vineyard: sceneTemplate("vineyard", "A Vigna", "Rows of vines and harvest words.", "assets/images/scenes/vineyard.svg", "racina"),
-  piazza: sceneTemplate("piazza", "A Chiazza", "Water, stone, and conversation.", "assets/images/scenes/piazza.svg", "acqua"),
-  "lemon-grove": sceneTemplate("lemon-grove", "U Giardini di Limuna", "Trees and citrus in warm light.", "assets/images/scenes/village.svg", "limuna"),
-  "nonnas-kitchen": sceneTemplate("nonnas-kitchen", "A Cucina di Nonna", "Family cooking and home language.", "assets/images/scenes/piazza.svg", "pani"),
-  alimentari: sceneTemplate("alimentari", "U Negoziu", "Shopping language in the village shop.", "assets/images/scenes/piazza.svg", "pani"),
-  market: sceneTemplate("market", "U Mercatu", "Produce stalls and spoken bargains.", "assets/images/scenes/piazza.svg", "pisci"),
-  caffe: sceneTemplate("caffe", "U Caffè", "Counter chatter and café rhythms.", "assets/images/scenes/piazza.svg", "cafi"),
-  beach: sceneTemplate("beach", "A Spiaggia", "Sea breeze and coastal vocabulary.", "assets/images/scenes/village.svg", "suli"),
-  posta: sceneTemplate("posta", "La Posta", "Letters, stamps, and formal phrases.", "assets/images/scenes/piazza.svg", "littra"),
+  vineyard: sceneTemplate("vineyard", "A Vigna", "Rows of vines and harvest words.", providedSceneImage, "racina"),
+  piazza: sceneTemplate("piazza", "A Chiazza", "Water, stone, and conversation.", providedSceneImage, "acqua"),
+  "lemon-grove": sceneTemplate("lemon-grove", "U Giardini di Limuna", "Trees and citrus in warm light.", providedSceneImage, "limuna"),
+  "nonnas-kitchen": sceneTemplate("nonnas-kitchen", "A Cucina di Nonna", "Family cooking and home language.", providedSceneImage, "pani"),
+  alimentari: sceneTemplate("alimentari", "U Negoziu", "Shopping language in the village shop.", providedSceneImage, "pani"),
+  market: sceneTemplate("market", "U Mercatu", "Produce stalls and spoken bargains.", providedSceneImage, "pisci"),
+  caffe: sceneTemplate("caffe", "U Caffè", "Counter chatter and café rhythms.", providedSceneImage, "cafi"),
+  beach: sceneTemplate("beach", "A Spiaggia", "Sea breeze and coastal vocabulary.", providedSceneImage, "suli"),
+  posta: sceneTemplate("posta", "La Posta", "Letters, stamps, and formal phrases.", providedSceneImage, "littra"),
 };
 
 const storageKey = "accussi_learning_state";
 const appState = { currentSceneId: "map", learningState: loadLearningState() };
 
-const sceneNameEl = document.getElementById("scene-name");
-const sceneDescriptionEl = document.getElementById("scene-description");
 const sceneBackgroundEl = document.getElementById("scene-background");
 const hotspotLayerEl = document.getElementById("hotspot-layer");
-const panelCopyEl = document.getElementById("panel-copy");
 const sceneNavEl = document.getElementById("scene-nav");
 
 renderSceneNav();
@@ -68,6 +64,15 @@ renderScene();
 
 function renderSceneNav() {
   sceneNavEl.innerHTML = "";
+
+  const mapButton = document.createElement("button");
+  mapButton.type = "button";
+  mapButton.className = "scene-button";
+  mapButton.textContent = "Main Map";
+  mapButton.addEventListener("click", () => setScene("map"));
+  if (appState.currentSceneId === "map") mapButton.classList.add("active");
+  sceneNavEl.appendChild(mapButton);
+
   Object.values(scenes)
     .filter((scene) => scene.id !== "map")
     .forEach((scene) => {
@@ -86,16 +91,11 @@ function setScene(sceneId) {
   appState.currentSceneId = sceneId;
   renderScene();
   renderSceneNav();
-  panelCopyEl.textContent = sceneId === "map"
-    ? "Tap a location on the village map to travel."
-    : "You move quietly. The world offers words when you interact.";
 }
 
 function renderScene() {
   const scene = scenes[appState.currentSceneId];
   if (!scene) return;
-  sceneNameEl.textContent = scene.name;
-  sceneDescriptionEl.textContent = scene.description;
   sceneBackgroundEl.style.backgroundImage = buildBackgroundImage(scene.backgroundImage);
   hotspotLayerEl.innerHTML = "";
 
@@ -136,9 +136,6 @@ function onHotspotInteract(hotspot) {
   appState.learningState[hotspot.vocabId] = state;
   persistLearningState(appState.learningState);
 
-  panelCopyEl.textContent = state.exposures < 4
-    ? `${vocab.sicilian} — ${vocab.english} (heard ${state.exposures} times)`
-    : `${vocab.sicilian} (heard ${state.exposures} times)`;
 
   playAudio(vocab.audio);
 }

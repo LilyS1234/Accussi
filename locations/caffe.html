@@ -14,7 +14,8 @@
         <p class="progress" id="progress">1/4</p>
         <h1 class="prompt" id="prompt-sicilian">U cafè</h1>
         <p class="prompt-translation" id="prompt-english">The coffee</p>
-        <p class="feedback" id="feedback">Tap an object to begin.</p>
+        <p class="feedback" id="feedback">Press Order Coffee to start the popup quiz.</p>
+        <button class="order-button" id="order-button" type="button">Order Coffee</button>
       </section>
 
       <section class="hotspot-stage" aria-label="Cafe learning game hotspots">
@@ -24,21 +25,8 @@
         <button class="hotspot hotspot-barista" data-object="barista" aria-label="Barista"></button>
       </section>
 
-      <div class="modal-backdrop" id="lesson-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div class="lesson-card">
-          <p class="progress" id="modal-progress">1/4</p>
-          <h2 id="modal-title">U cafè</h2>
-          <p class="translation" id="modal-translation">The coffee</p>
-
-          <p class="instruction">Tap the correct object, then answer:</p>
-          <div class="choices" id="choices"></div>
-
-          <p class="feedback" id="modal-feedback">Try finding the right object in the image.</p>
-
-          <div class="card-actions">
-            <button id="next-button" type="button">Next</button>
-          </div>
-        </div>
+      <div class="lesson-popup" id="lesson-popup" role="status" aria-live="polite" hidden>
+        <p class="instruction" id="popup-instruction">Click on U cafè</p>
       </div>
     </main>
 

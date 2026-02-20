@@ -97,6 +97,7 @@ function renderScene() {
   const scene = scenes[appState.currentSceneId];
   if (!scene) return;
   sceneBackgroundEl.style.backgroundImage = buildBackgroundImage(scene.backgroundImage);
+  hotspotLayerEl.classList.toggle("map-hotspots", scene.id === "map");
   hotspotLayerEl.innerHTML = "";
 
   scene.hotspots.forEach((hotspot) => {

@@ -50,6 +50,18 @@ body {
   padding: 0.1rem 0.45rem;
 }
 
+
+.map-hotspots .hotspot-scene {
+  background: transparent;
+  border-color: transparent;
+}
+.map-hotspots .hotspot-scene .hotspot-label { display: none; }
+.map-hotspots .hotspot-scene:hover,
+.map-hotspots .hotspot-scene:focus-visible {
+  transform: none;
+  border-color: transparent;
+}
+
 .scene-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .scene-button { border: 1px solid rgba(0, 0, 0, 0.2); background: #fff; color: var(--text); border-radius: 999px; padding: 0.4rem 0.75rem; font: inherit; }
 .scene-button.active { border-color: var(--accent); background: var(--accent-soft); }

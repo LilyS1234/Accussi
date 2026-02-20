@@ -18,6 +18,7 @@ const musicPrefKey = "accussi_music_enabled";
 let introTimer = null;
 let introFlightAudio = null;
 let mapMusicAudio = null;
+let mapMusicPrimed = false;
 
 const sceneTemplate = (id, name, description, image, vocabId) => ({
   id,
@@ -80,6 +81,7 @@ const sceneNavEl = document.getElementById("scene-nav");
 
 renderSceneNav();
 renderScene();
+primeMapMusicForAutoplay();
 updateMapMusicState();
 
 function renderSceneNav() {
@@ -135,6 +137,7 @@ function setScene(sceneId) {
   }
   if (sceneId !== introSceneId) stopIntroFlightSound();
   appState.currentSceneId = sceneId;
+  if (sceneId === mapSceneId) primeMapMusicForAutoplay();
   renderScene();
   renderSceneNav();
   updateMapMusicState();
@@ -310,6 +313,21 @@ function ensureMapMusicAudio() {
   return mapMusicAudio;
 }
 
+function primeMapMusicForAutoplay() {
+  const music = ensureMapMusicAudio();
+  if (mapMusicPrimed) return;
+
+  music.muted = true;
+  music
+    .play()
+    .then(() => {
+      music.pause();
+      music.currentTime = 0;
+      mapMusicPrimed = true;
+    })
+    .catch(() => {});
+}
+
 function updateMapMusicState() {
   const shouldPlay = appState.currentSceneId === mapSceneId && appState.musicEnabled;
   const music = ensureMapMusicAudio();
@@ -319,8 +337,10 @@ function updateMapMusicState() {
     return;
   }
 
+  music.muted = false;
   music.play().catch(() => {
     const resumeOnInteraction = () => {
+      music.muted = false;
       music.play().catch(() => {});
       window.removeEventListener("pointerdown", resumeOnInteraction);
     };

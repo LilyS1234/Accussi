@@ -1,37 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accussi — The Village</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <!-- Map view (hub): clickable village map -->
-  <main id="map-view" class="map-view" aria-label="Village of Accussi map">
-    <div id="map-container" class="map-container"></div>
-  </main>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accussi</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app" id="app">
+      <header class="scene-header">
+        <h1 id="scene-name">Accussi</h1>
+        <p id="scene-description"></p>
+      </header>
 
-  <!-- Scene view: shown after traveling to a location -->
-  <main id="scene-view" class="scene-view" aria-live="polite">
-    <div id="scene-background" class="scene-background" aria-hidden="true"></div>
-    <div id="scene-placeholder" class="scene-placeholder" hidden aria-hidden="false">
-      <strong id="scene-placeholder-name">Scene</strong>
-      <span id="scene-placeholder-desc">Lesson content will appear here.</span>
-    </div>
-    <header class="scene-header">
-      <h1 class="scene-title" id="scene-title">The Village</h1>
-      <button type="button" class="back-to-map" id="back-to-map">Back to map</button>
-    </header>
-  </main>
+      <section class="scene-stage" id="scene-stage" aria-live="polite">
+        <div class="scene-background" id="scene-background" role="img" aria-label="Current scene"></div>
+        <div class="hotspot-layer" id="hotspot-layer" aria-label="Interactive scene hotspots"></div>
+      </section>
 
-  <!-- Fallback data so the map works when opened as file:// (no fetch) -->
-  <script>
-    window.ACCUSSI_FALLBACK_DATA = {
-      manifest: {"version":1,"defaultSceneId":"map","scenes":[{"id":"map","name":"The Village of Accussi","description":"World map hub — click a location to travel.","type":"hub","order":0,"assets":{"background":"scenes/map/background.png"}},{"id":"piazza","name":"The Piazza","description":"Central square with fountain and surrounding buildings.","lessonFocus":["greetings","directions","fountain"],"order":1,"assets":{"background":"scenes/piazza/background.png","audio":"scenes/piazza/ambient.mp3"}},{"id":"posta","name":"La Posta","description":"The post office.","lessonFocus":["mail","sending","formal language"],"order":2,"assets":{"background":"scenes/posta/background.png","audio":"scenes/posta/ambient.mp3"}},{"id":"alimentari","name":"Alimentari","description":"Grocery or deli with outdoor seating.","lessonFocus":["food","shopping","quantities"],"order":3,"assets":{"background":"scenes/alimentari/background.png","audio":"scenes/alimentari/ambient.mp3"}},{"id":"caffe","name":"Caffé","description":"Bar with outdoor counter and barista.","lessonFocus":["drinks","ordering","bar phrases"],"order":4,"assets":{"background":"scenes/caffe/background.png","audio":"scenes/caffe/ambient.mp3"}},{"id":"vineyard","name":"The Vineyard","description":"Vineyard with grapevines and harvest.","lessonFocus":["grapes","harvest","nature"],"order":5,"assets":{"background":"scenes/vineyard/background.png","audio":"scenes/vineyard/ambient.mp3"}},{"id":"lemon-grove","name":"Lemon Grove","description":"Orchard with lemon trees.","lessonFocus":["lemons","nature","adjectives"],"order":6,"assets":{"background":"scenes/lemon-grove/background.png","audio":"scenes/lemon-grove/ambient.mp3"}},{"id":"nonnas-kitchen","name":"Nonna's Kitchen","description":"Cozy home with Nonna — cooking and family.","lessonFocus":["cooking","family","home"],"order":7,"assets":{"background":"scenes/nonnas-kitchen/background.png","audio":"scenes/nonnas-kitchen/ambient.mp3"}},{"id":"market","name":"The Market","description":"Market stalls with fruit and vegetables.","lessonFocus":["fruit","vegetables","buying"],"order":8,"assets":{"background":"scenes/market/background.png","audio":"scenes/market/ambient.mp3"}},{"id":"beach","name":"The Beach","description":"Sandy beach with sea and palm trees.","lessonFocus":["sea","leisure","simple phrases"],"order":9,"assets":{"background":"scenes/beach/background.png","audio":"scenes/beach/ambient.mp3"}}]},
-      mapScene: {"id":"map","hotspots":[{"sceneId":"piazza","label":"The Piazza","left":40,"top":32,"width":22,"height":26},{"sceneId":"posta","label":"La Posta","left":52,"top":30,"width":14,"height":20},{"sceneId":"alimentari","label":"Alimentari","left":16,"top":36,"width":16,"height":24},{"sceneId":"caffe","label":"Caffé","left":18,"top":58,"width":14,"height":22},{"sceneId":"vineyard","label":"The Vineyard","left":38,"top":8,"width":24,"height":24},{"sceneId":"lemon-grove","label":"Lemon Grove","left":2,"top":30,"width":14,"height":28},{"sceneId":"nonnas-kitchen","label":"Nonna's Kitchen","left":70,"top":14,"width":22,"height":24},{"sceneId":"market","label":"The Market","left":58,"top":40,"width":18,"height":22},{"sceneId":"beach","label":"The Beach","left":68,"top":58,"width":26,"height":34}]}
-    };
-  </script>
-  <script src="js/app.js"></script>
-</body>
+      <aside class="interaction-panel" id="interaction-panel" aria-live="polite">
+        <h2 class="panel-title">Parra cu lu munnu</h2>
+        <p class="panel-copy" id="panel-copy">Click the world to discover Sicilian words naturally through place and memory.</p>
+      </aside>
+
+      <nav class="scene-nav" id="scene-nav" aria-label="Scene navigation"></nav>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
 </html>

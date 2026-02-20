@@ -1,0 +1,59 @@
+:root {
+  --bg: #f3efe4;
+  --card: #f9f6ee;
+  --text: #2f2518;
+  --accent: #7f4f24;
+  --accent-soft: rgba(127, 79, 36, 0.2);
+  --scene-hotspot: rgba(36, 81, 156, 0.2);
+  --vocab-hotspot: rgba(127, 79, 36, 0.2);
+  --shadow: 0 12px 32px rgba(34, 20, 9, 0.18);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Georgia, "Times New Roman", serif;
+  background: linear-gradient(180deg, #ece2c6 0%, var(--bg) 100%);
+  color: var(--text);
+}
+
+.app { max-width: 1080px; margin: 0 auto; padding: 1.25rem; display: grid; gap: 1rem; }
+.scene-header, .interaction-panel, .scene-nav { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 0.9rem 1rem; }
+#scene-name { margin: 0; font-size: clamp(1.5rem, 2.2vw, 2.1rem); }
+#scene-description { margin: 0.5rem 0 0; opacity: 0.9; }
+
+.scene-stage { position: relative; min-height: 620px; aspect-ratio: 3 / 2; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+.scene-background { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.hotspot-layer { position: relative; width: 100%; height: 100%; min-height: 620px; }
+
+.hotspot {
+  position: absolute;
+  border: 2px dashed rgba(255, 255, 255, 0.72);
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0.35rem;
+  transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+.hotspot-vocab { background: var(--vocab-hotspot); }
+.hotspot-scene { background: var(--scene-hotspot); }
+.hotspot:hover, .hotspot:focus-visible {
+  transform: scale(1.02);
+  cursor: pointer;
+  border-color: #fff;
+}
+.hotspot-label {
+  background: rgba(20, 16, 9, 0.78);
+  color: #fff;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+}
+
+.panel-title { margin: 0 0 0.45rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.panel-copy { margin: 0; line-height: 1.45; }
+.scene-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.scene-button { border: 1px solid rgba(0, 0, 0, 0.2); background: #fff; color: var(--text); border-radius: 999px; padding: 0.4rem 0.75rem; font: inherit; }
+.scene-button.active { border-color: var(--accent); background: var(--accent-soft); }

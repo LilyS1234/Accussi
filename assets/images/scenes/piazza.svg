@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <rect width="1400" height="900" fill="#f1d6ab"/>
+  <rect y="520" width="1400" height="380" fill="#c9a57a"/>
+  <g transform="translate(80 150)">
+    <rect width="360" height="440" fill="#d7b287"/>
+    <polygon points="-20,0 180,-120 380,0" fill="#a86543"/>
+    <rect x="50" y="90" width="70" height="90" fill="#7c5030"/>
+    <rect x="150" y="90" width="70" height="90" fill="#7c5030"/>
+    <rect x="250" y="90" width="70" height="90" fill="#7c5030"/>
+  </g>
+  <g transform="translate(510 120)">
+    <rect width="390" height="470" fill="#e0bc94"/>
+    <polygon points="-20,0 195,-130 410,0" fill="#b47149"/>
+    <rect x="78" y="110" width="80" height="95" fill="#815334"/>
+    <rect x="235" y="110" width="80" height="95" fill="#815334"/>
+    <rect x="165" y="300" width="60" height="170" fill="#6d4227"/>
+  </g>
+  <g transform="translate(980 170)">
+    <rect width="320" height="420" fill="#d2ad83"/>
+    <polygon points="-16,0 160,-105 336,0" fill="#9f5e3f"/>
+    <rect x="52" y="90" width="64" height="84" fill="#754a2d"/>
+    <rect x="130" y="90" width="64" height="84" fill="#754a2d"/>
+    <rect x="208" y="90" width="64" height="84" fill="#754a2d"/>
+  </g>
+  <g transform="translate(700 640)">
+    <ellipse cx="0" cy="60" rx="170" ry="42" fill="#9f7b52" opacity="0.45"/>
+    <circle cx="0" cy="0" r="86" fill="#9db7c8"/>
+    <circle cx="0" cy="0" r="44" fill="#ebf4fb"/>
+    <circle cx="0" cy="0" r="16" fill="#9db7c8"/>
+  </g>
+  <text x="90" y="88" font-size="46" fill="#3f2c18" font-family="Georgia, serif">A Chiazza</text>
+</svg>

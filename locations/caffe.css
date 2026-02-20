@@ -56,14 +56,12 @@ body {
   color: #ffd880;
 }
 
-.prompt,
-#modal-title {
+.prompt {
   margin: 0.35rem 0;
   font-size: clamp(1.4rem, 3.4vw, 2rem);
 }
 
-.prompt-translation,
-.translation {
+.prompt-translation {
   margin: 0;
   opacity: 0.9;
   font-size: 1rem;
@@ -81,6 +79,17 @@ body {
 
 .feedback.wrong {
   color: #ffd0d0;
+}
+
+.order-button {
+  margin-top: 0.85rem;
+  border: none;
+  border-radius: 12px;
+  background: #ffd880;
+  color: #352a10;
+  font-weight: 700;
+  padding: 0.6rem 0.95rem;
+  cursor: pointer;
 }
 
 .hotspot-stage {
@@ -129,60 +138,22 @@ body {
   height: 38%;
 }
 
-.modal-backdrop {
+.lesson-popup {
   position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  z-index: 8;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 1rem;
-}
-
-.lesson-card {
-  width: min(560px, 100%);
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  z-index: 7;
   background: rgba(23, 23, 28, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 1rem;
-  backdrop-filter: blur(4px);
+  border-radius: 999px;
+  padding: 0.8rem 1.1rem;
 }
 
 .instruction {
-  margin-bottom: 0.75rem;
-}
-
-.choices {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
-}
-
-.choice {
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  border-radius: 12px;
-  padding: 0.7rem;
-  font-size: 0.95rem;
-}
-
-.choice:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.card-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-#next-button {
-  border: none;
-  border-radius: 12px;
-  background: #ffd880;
-  color: #352a10;
+  margin: 0;
+  font-size: 1rem;
   font-weight: 700;
-  padding: 0.6rem 1rem;
 }
 
 @media (max-width: 760px) {
@@ -191,9 +162,5 @@ body {
     bottom: 1rem;
     right: 1rem;
     left: 1rem;
-  }
-
-  .choices {
-    grid-template-columns: 1fr;
   }
 }

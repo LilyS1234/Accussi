@@ -50,7 +50,6 @@ body {
   padding: 0.1rem 0.45rem;
 }
 
-
 .map-hotspots .hotspot-scene {
   background: transparent;
   border-color: transparent;
@@ -62,6 +61,79 @@ body {
   border-color: transparent;
 }
 
+.intro-hotspots {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.intro-cloud {
+  position: absolute;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  opacity: 0.8;
+  animation: floatCloud 6s ease-in-out infinite;
+}
+
+.intro-plane-wrap {
+  position: absolute;
+  top: 42%;
+  left: -36%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: flyAcross 6.5s linear forwards;
+}
+
+.intro-plane {
+  font-size: clamp(2.3rem, 3.8vw, 3rem);
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.2));
+}
+
+.intro-bubble {
+  max-width: min(60vw, 410px);
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  border-bottom-right-radius: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #23415f;
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  box-shadow: 0 10px 20px rgba(15, 40, 74, 0.16);
+  opacity: 0;
+  animation: bubblePop 6.5s linear forwards;
+}
+
+.intro-skip {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.88);
+  color: #244a6b;
+  box-shadow: 0 5px 16px rgba(25, 60, 89, 0.2);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.scene-nav.hidden { display: none; }
 .scene-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .scene-button { border: 1px solid rgba(0, 0, 0, 0.2); background: #fff; color: var(--text); border-radius: 999px; padding: 0.4rem 0.75rem; font: inherit; }
 .scene-button.active { border-color: var(--accent); background: var(--accent-soft); }
+
+@keyframes flyAcross {
+  0% { left: -40%; }
+  100% { left: 108%; }
+}
+
+@keyframes bubblePop {
+  0%, 18% { opacity: 0; transform: translateY(10px) scale(0.8); }
+  25%, 75% { opacity: 1; transform: translateY(0) scale(1); }
+  90%, 100% { opacity: 0; transform: translateY(-8px) scale(0.96); }
+}
+
+@keyframes floatCloud {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}

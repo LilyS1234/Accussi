@@ -12,8 +12,12 @@ const vocabulary = {
 
 const providedSceneImage = "assets/images/scenes/village-map-provided.png";
 const introSceneId = "flight-to-sicily";
+const mapSceneId = "map";
+const mapMusicSrc = "assets/audio/pixel-passeggiata.mp3";
+const musicPrefKey = "accussi_music_enabled";
 let introTimer = null;
 let introFlightAudio = null;
+let mapMusicAudio = null;
 
 const sceneTemplate = (id, name, description, image, vocabId) => ({
   id,
@@ -22,7 +26,7 @@ const sceneTemplate = (id, name, description, image, vocabId) => ({
   backgroundImage: image,
   hotspots: [
     { type: "vocab", vocabId, label: vocabulary[vocabId]?.sicilian || "Parola", left: 38, top: 52, width: 24, height: 26 },
-    { type: "scene", targetSceneId: "map", label: "Torna ô paisi", left: 2, top: 4, width: 22, height: 14 },
+    { type: "scene", targetSceneId: mapSceneId, label: "Torna ô paisi", left: 2, top: 4, width: 22, height: 14 },
   ],
 });
 
@@ -39,8 +43,8 @@ const scenes = {
     hotspots: [],
     isIntro: true,
   },
-  map: {
-    id: "map",
+  [mapSceneId]: {
+    id: mapSceneId,
     name: "The Village of Accussi",
     description: "Choose a place in the village map to begin your scene.",
     backgroundImage: providedSceneImage,
@@ -68,7 +72,7 @@ const scenes = {
 };
 
 const storageKey = "accussi_learning_state";
-const appState = { currentSceneId: introSceneId, learningState: loadLearningState() };
+const appState = { currentSceneId: introSceneId, learningState: loadLearningState(), musicEnabled: loadMusicEnabled() };
 
 const sceneBackgroundEl = document.getElementById("scene-background");
 const hotspotLayerEl = document.getElementById("hotspot-layer");
@@ -76,6 +80,7 @@ const sceneNavEl = document.getElementById("scene-nav");
 
 renderSceneNav();
 renderScene();
+updateMapMusicState();
 
 function renderSceneNav() {
   const isIntroScene = Boolean(scenes[appState.currentSceneId]?.isIntro);
@@ -92,12 +97,12 @@ function renderSceneNav() {
   mapButton.type = "button";
   mapButton.className = "scene-button";
   mapButton.textContent = "Main Map";
-  mapButton.addEventListener("click", () => setScene("map"));
-  if (appState.currentSceneId === "map") mapButton.classList.add("active");
+  mapButton.addEventListener("click", () => setScene(mapSceneId));
+  if (appState.currentSceneId === mapSceneId) mapButton.classList.add("active");
   sceneNavEl.appendChild(mapButton);
 
   Object.values(scenes)
-    .filter((scene) => scene.id !== "map" && !scene.isIntro)
+    .filter((scene) => scene.id !== mapSceneId && !scene.isIntro)
     .forEach((scene) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -107,6 +112,19 @@ function renderSceneNav() {
       if (scene.id === appState.currentSceneId) button.classList.add("active");
       sceneNavEl.appendChild(button);
     });
+
+  const musicToggle = document.createElement("button");
+  musicToggle.type = "button";
+  musicToggle.className = "scene-button music-toggle";
+  musicToggle.textContent = appState.musicEnabled ? "Music: On" : "Music: Off";
+  musicToggle.setAttribute("aria-pressed", String(appState.musicEnabled));
+  musicToggle.addEventListener("click", () => {
+    appState.musicEnabled = !appState.musicEnabled;
+    persistMusicEnabled(appState.musicEnabled);
+    updateMapMusicState();
+    renderSceneNav();
+  });
+  sceneNavEl.appendChild(musicToggle);
 }
 
 function setScene(sceneId) {
@@ -119,14 +137,18 @@ function setScene(sceneId) {
   appState.currentSceneId = sceneId;
   renderScene();
   renderSceneNav();
+  updateMapMusicState();
 }
 
 function renderScene() {
   const scene = scenes[appState.currentSceneId];
   if (!scene) return;
   sceneBackgroundEl.style.backgroundImage = buildBackgroundImage(scene.backgroundImage);
-  hotspotLayerEl.classList.toggle("map-hotspots", scene.id === "map");
+  const isMapScene = scene.id === mapSceneId;
+  sceneBackgroundEl.classList.toggle("map-reveal-bg", isMapScene);
+  hotspotLayerEl.classList.toggle("map-hotspots", isMapScene);
   hotspotLayerEl.classList.toggle("intro-hotspots", Boolean(scene.isIntro));
+  hotspotLayerEl.classList.toggle("map-reveal", isMapScene);
   hotspotLayerEl.innerHTML = "";
 
   if (scene.isIntro) {
@@ -181,7 +203,7 @@ function renderIntroScene() {
 
   const speechBubble = document.createElement("div");
   speechBubble.className = "intro-bubble";
-  speechBubble.textContent = "Passengers, this is your captain speaking: Sicily ahead — prepare for landing in Accussi!";
+  speechBubble.textContent = "Buongiorno, dreamers! Captain Luminari here — we're swirling through sun-kissed clouds, so sip the sky and get ready for a grand arrival in Accussi!";
   planeWrap.appendChild(speechBubble);
 
   const plane = document.createElement("span");
@@ -195,12 +217,12 @@ function renderIntroScene() {
   skipButton.type = "button";
   skipButton.className = "intro-skip";
   skipButton.textContent = "Skip flight";
-  skipButton.addEventListener("click", () => setScene("map"));
+  skipButton.addEventListener("click", () => setScene(mapSceneId));
   hotspotLayerEl.appendChild(skipButton);
 
   introTimer = setTimeout(() => {
-    if (appState.currentSceneId === introSceneId) setScene("map");
-  }, 6800);
+    if (appState.currentSceneId === introSceneId) setScene(mapSceneId);
+  }, 9800);
 }
 
 function startIntroFlightSound() {
@@ -277,6 +299,36 @@ function stopIntroFlightSound() {
   introFlightAudio = null;
 }
 
+
+
+function ensureMapMusicAudio() {
+  if (mapMusicAudio) return mapMusicAudio;
+
+  mapMusicAudio = new Audio(mapMusicSrc);
+  mapMusicAudio.loop = true;
+  mapMusicAudio.volume = 0.5;
+  return mapMusicAudio;
+}
+
+function updateMapMusicState() {
+  const shouldPlay = appState.currentSceneId === mapSceneId && appState.musicEnabled;
+  const music = ensureMapMusicAudio();
+
+  if (!shouldPlay) {
+    music.pause();
+    return;
+  }
+
+  music.play().catch(() => {
+    const resumeOnInteraction = () => {
+      music.play().catch(() => {});
+      window.removeEventListener("pointerdown", resumeOnInteraction);
+    };
+
+    window.addEventListener("pointerdown", resumeOnInteraction, { once: true });
+  });
+}
+
 function buildBackgroundImage(backgroundImage) {
   const imageList = Array.isArray(backgroundImage) ? backgroundImage : [backgroundImage];
   return imageList.map((imagePath) => (imagePath.startsWith("linear-gradient") || imagePath.startsWith("radial-gradient") ? imagePath : `url(${imagePath})`)).join(", ");
@@ -313,4 +365,18 @@ function loadLearningState() {
 
 function persistLearningState(state) {
   localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+function loadMusicEnabled() {
+  try {
+    const raw = localStorage.getItem(musicPrefKey);
+    if (raw === null) return true;
+    return raw === "true";
+  } catch {
+    return true;
+  }
+}
+
+function persistMusicEnabled(enabled) {
+  localStorage.setItem(musicPrefKey, String(Boolean(enabled)));
 }

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>U Caffè | Accussi</title>
+    <link rel="stylesheet" href="caffe.css" />
+  </head>
+  <body>
+    <main class="caffe-game" aria-live="polite">
+      <a class="back-button" href="../index.html">← Back to Map</a>
+
+      <section class="game-hud">
+        <p class="progress" id="progress">1/4</p>
+        <h1 class="prompt" id="prompt-sicilian">U cafè</h1>
+        <p class="prompt-translation" id="prompt-english">The coffee</p>
+        <p class="feedback" id="feedback">Tap an object to begin.</p>
+      </section>
+
+      <section class="hotspot-stage" aria-label="Cafe learning game hotspots">
+        <button class="hotspot hotspot-machine" data-object="machine" aria-label="Espresso machine"></button>
+        <button class="hotspot hotspot-cup" data-object="coffee" aria-label="Coffee cup on counter"></button>
+        <button class="hotspot hotspot-brioche" data-object="brioche" aria-label="Brioche pastry case"></button>
+        <button class="hotspot hotspot-barista" data-object="barista" aria-label="Barista"></button>
+      </section>
+
+      <div class="modal-backdrop" id="lesson-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="lesson-card">
+          <p class="progress" id="modal-progress">1/4</p>
+          <h2 id="modal-title">U cafè</h2>
+          <p class="translation" id="modal-translation">The coffee</p>
+
+          <p class="instruction">Tap the correct object, then answer:</p>
+          <div class="choices" id="choices"></div>
+
+          <p class="feedback" id="modal-feedback">Try finding the right object in the image.</p>
+
+          <div class="card-actions">
+            <button id="next-button" type="button">Next</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="caffe.js"></script>
+  </body>
+</html>

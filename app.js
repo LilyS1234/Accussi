@@ -111,7 +111,13 @@ function renderSceneNav() {
       button.type = "button";
       button.className = "scene-button";
       button.textContent = scene.name;
-      button.addEventListener("click", () => setScene(scene.id));
+      button.addEventListener("click", () => {
+        if (scene.id === "caffe") {
+          window.location.href = "locations/caffe.html";
+          return;
+        }
+        setScene(scene.id);
+      });
       if (scene.id === appState.currentSceneId) button.classList.add("active");
       sceneNavEl.appendChild(button);
     });
@@ -374,7 +380,13 @@ function buildBackgroundImage(backgroundImage) {
 }
 
 function onHotspotInteract(hotspot) {
-  if (hotspot.type === "scene") return setScene(hotspot.targetSceneId);
+  if (hotspot.type === "scene") {
+    if (hotspot.targetSceneId === "caffe") {
+      window.location.href = "locations/caffe.html";
+      return;
+    }
+    return setScene(hotspot.targetSceneId);
+  }
 
   const vocab = vocabulary[hotspot.vocabId];
   if (!vocab) return;

@@ -317,12 +317,15 @@ function primeMapMusicForAutoplay() {
   const music = ensureMapMusicAudio();
   if (mapMusicPrimed) return;
 
+  const shouldRemainPlaying = appState.currentSceneId === mapSceneId && appState.musicEnabled;
   music.muted = true;
   music
     .play()
     .then(() => {
-      music.pause();
-      music.currentTime = 0;
+      if (!shouldRemainPlaying) {
+        music.pause();
+        music.currentTime = 0;
+      }
       mapMusicPrimed = true;
     })
     .catch(() => {});

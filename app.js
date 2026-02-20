@@ -19,6 +19,7 @@ let introTimer = null;
 let introFlightAudio = null;
 let mapMusicAudio = null;
 let mapMusicPrimed = false;
+let mapMusicUnlockListenersAttached = false;
 
 const sceneTemplate = (id, name, description, image, vocabId) => ({
   id,
@@ -308,9 +309,30 @@ function ensureMapMusicAudio() {
   if (mapMusicAudio) return mapMusicAudio;
 
   mapMusicAudio = new Audio(mapMusicSrc);
+  mapMusicAudio.preload = "auto";
   mapMusicAudio.loop = true;
   mapMusicAudio.volume = 0.5;
   return mapMusicAudio;
+}
+
+function attachMapMusicUnlockListeners() {
+  if (mapMusicUnlockListenersAttached) return;
+
+  const resumeOnInteraction = () => {
+    updateMapMusicState();
+
+    if (appState.currentSceneId === mapSceneId && appState.musicEnabled && mapMusicAudio && !mapMusicAudio.paused) {
+      ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
+        window.removeEventListener(eventName, resumeOnInteraction);
+      });
+      mapMusicUnlockListenersAttached = false;
+    }
+  };
+
+  ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
+    window.addEventListener(eventName, resumeOnInteraction);
+  });
+  mapMusicUnlockListenersAttached = true;
 }
 
 function primeMapMusicForAutoplay() {
@@ -342,13 +364,7 @@ function updateMapMusicState() {
 
   music.muted = false;
   music.play().catch(() => {
-    const resumeOnInteraction = () => {
-      music.muted = false;
-      music.play().catch(() => {});
-      window.removeEventListener("pointerdown", resumeOnInteraction);
-    };
-
-    window.addEventListener("pointerdown", resumeOnInteraction, { once: true });
+    attachMapMusicUnlockListeners();
   });
 }
 

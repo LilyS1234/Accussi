@@ -11,9 +11,7 @@ The core principle is world-first, learning-second. Interaction should feel expl
 - `index.html`: semantic shell for scene, interaction panel, and scene navigation.
 - `styles.css`: immersive visual styling and hotspot overlays.
 - `app.js`: separated modules for village map scene, location scenes, vocabulary data, and learning-state persistence.
-- `assets/images/scenes/village-map-provided.png`: preferred main village map image (drop-in asset).
-- `assets/images/scenes/village-map.svg`: automatic fallback map if the preferred image file is missing.
-- `assets/images/scenes/*.svg`: location backdrops used after traveling from the map.
+- `assets/images/scenes/village-map-provided.png`: owner-provided image used across map and location scenes.
 
 ## Learning State
 
@@ -40,6 +38,6 @@ Each vocabulary entry tracks:
 ## Immediate Next Steps
 
 - Add the exact owner-provided village map image file at `assets/images/scenes/village-map-provided.png`.
-- Replace placeholder location art with dedicated scene illustrations per location.
+- Add dedicated owner-provided scene images per location as they become available.
 - Add richer scene transition effects.
 - Introduce lightweight character interaction hooks while keeping scene and learning systems decoupled.

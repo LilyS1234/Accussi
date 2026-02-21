@@ -1,5 +1,5 @@
 const prompts = [
-  { id: "coffee", sicilian: "U cafè", english: "The coffee" },
+  { id: "coffee", sicilian: "U cafè", english: "Coffee" },
   { id: "brioche", sicilian: "A brioscia", english: "The brioche" },
   { id: "barista", sicilian: "U barista", english: "The barista" },
   { id: "machine", sicilian: "A machina dû cafè", english: "The espresso machine" },
@@ -21,21 +21,21 @@ let hotspotConfig = [
   { name: "barista", objectId: "barista", left: 53, top: 30, width: 21, height: 28 },
 ];
 
-const autoStartDelayMs = 900;
-const baristaGreetingDelayMs = 700;
+const baristaGreetingDelayMs = 3200;
+const baristaGreetingDurationMs = 3600;
+const lessonFeedbackBubbleDurationMs = 1800;
 const ambiencePrefKey = "accussi_caffe_ambience_enabled";
 const hotspotConfigStorageKey = "accussi_caffe_hotspot_config";
 
 let currentIndex = 0;
 let gameActive = false;
-let autoStartTimer = null;
 let greetingTimer = null;
 
 const promptSicilian = document.getElementById("prompt-sicilian");
 const promptEnglish = document.getElementById("prompt-english");
 const progressEl = document.getElementById("progress");
 const feedbackEl = document.getElementById("feedback");
-const orderButton = document.getElementById("order-button");
+const startButton = document.getElementById("start-button");
 const ambienceToggle = document.getElementById("ambience-toggle");
 const hotspotStage = document.getElementById("hotspot-stage");
 const sceneWrapper = document.getElementById("scene-wrapper");
@@ -61,7 +61,8 @@ let ambienceOneshotTimer = null;
 let ambienceUnlockAttached = false;
 
 const params = new URLSearchParams(window.location.search);
-let debugMode = params.has("devtools") || params.has("debugHotspots");
+const isLocalDebugHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+let debugMode = isLocalDebugHost && (params.has("devtools") || params.has("debugHotspots"));
 let editorMode = false;
 let isDrawing = false;
 let dragStartPercent = null;
@@ -491,9 +492,10 @@ function setAmbienceEnabled(nextValue) {
   stopAmbience();
 }
 
-function showBaristaBubble() {
+function showBaristaBubble(message, durationMs = lessonFeedbackBubbleDurationMs) {
   if (!baristaBubble) return;
 
+  baristaBubble.textContent = message;
   baristaBubble.hidden = false;
   if (baristaBubbleTimer) {
     clearTimeout(baristaBubbleTimer);
@@ -502,7 +504,7 @@ function showBaristaBubble() {
   baristaBubbleTimer = setTimeout(() => {
     baristaBubble.hidden = true;
     baristaBubbleTimer = null;
-  }, 3400);
+  }, durationMs);
 }
 
 function setFeedback(message, type = "") {
@@ -515,7 +517,7 @@ function updatePromptHud() {
   if (!gameActive) {
     progressEl.textContent = `0/${prompts.length}`;
     promptSicilian.textContent = "Ready?";
-    promptEnglish.textContent = "Press Order Coffee to play again.";
+    promptEnglish.textContent = "Press Start Lesson to play.";
     return;
   }
 
@@ -542,32 +544,32 @@ function startGame() {
   setFeedback("Find the object in the scene.");
   updatePromptHud();
   updatePopupInstruction();
+  startButton.disabled = true;
 }
 
 function finishGame() {
   gameActive = false;
   lessonPopup.hidden = true;
-  setFeedback("Great! You matched all the words. Press Order Coffee to play again.", "correct");
+  setFeedback("Great! You matched all the words. Press Start Lesson to play again.", "correct");
+  startButton.disabled = false;
   updatePromptHud();
 }
 
 function handleHotspotTap(objectId) {
-  if (objectId === "barista") {
-    showBaristaBubble();
-  }
-
   if (!gameActive) {
-    setFeedback("The lesson will start automatically. Press Order Coffee to restart anytime.", "wrong");
+    setFeedback("Explore the café, then press Start Lesson when you are ready.");
     return;
   }
 
   const prompt = prompts[currentIndex];
   if (objectId !== prompt.id) {
     setFeedback(`Not quite — click on ${prompt.sicilian}.`, "wrong");
+    showBaristaBubble("Try again.");
     return;
   }
 
   setFeedback("Correct!", "correct");
+  showBaristaBubble("Good job!");
 
   if (currentIndex === prompts.length - 1) {
     finishGame();
@@ -580,17 +582,13 @@ function handleHotspotTap(objectId) {
 }
 
 function bootCaffeScene() {
-  greetingTimer = setTimeout(showBaristaBubble, baristaGreetingDelayMs);
-  autoStartTimer = setTimeout(() => {
-    startGame();
-  }, autoStartDelayMs);
+  greetingTimer = setTimeout(() => {
+    showBaristaBubble("Welcome! What would you like?", baristaGreetingDurationMs);
+  }, baristaGreetingDelayMs);
 }
 
-orderButton.addEventListener("click", () => {
-  if (autoStartTimer) {
-    clearTimeout(autoStartTimer);
-    autoStartTimer = null;
-  }
+startButton.addEventListener("click", () => {
+  if (gameActive) return;
   startGame();
 });
 
@@ -622,7 +620,6 @@ window.addEventListener("mouseup", endDraw);
 saveHotspotButton.addEventListener("click", saveLatestHotspot);
 
 window.addEventListener("beforeunload", () => {
-  if (autoStartTimer) clearTimeout(autoStartTimer);
   if (greetingTimer) clearTimeout(greetingTimer);
   if (baristaBubbleTimer) clearTimeout(baristaBubbleTimer);
   stopAmbienceOneShots();
@@ -638,7 +635,7 @@ debugToggle.checked = debugMode;
 syncEditorVisibility();
 syncModeClasses();
 updatePromptHud();
-setFeedback("Loading lesson...");
+setFeedback("Take in the scene, then press Start Lesson when you are ready.");
 updatePopupInstruction();
 updateAmbienceToggleLabel();
 if (ambienceEnabled) {

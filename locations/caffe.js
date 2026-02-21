@@ -1,8 +1,8 @@
 const prompts = [
-  { id: "coffee", sicilian: "U cafè", english: "Coffee" },
-  { id: "brioche", sicilian: "A brioscia", english: "The brioche" },
-  { id: "barista", sicilian: "U barista", english: "The barista" },
-  { id: "machine", sicilian: "A machina dû cafè", english: "The espresso machine" },
+  { id: "coffee", sicilian: "U cafè", english: "Coffee", emoji: "☕" },
+  { id: "brioche", sicilian: "A brioscia", english: "The brioche", emoji: "🥐" },
+  { id: "barista", sicilian: "U barista", english: "The barista", emoji: "🧑‍🍳" },
+  { id: "machine", sicilian: "A machina dû cafè", english: "The espresso machine", emoji: "🫖" },
 ];
 
 const hotspotNameToObject = {
@@ -30,6 +30,8 @@ const hotspotConfigStorageKey = "accussi_caffe_hotspot_config";
 let currentIndex = 0;
 let gameActive = false;
 let greetingTimer = null;
+let selectedWordId = null;
+let matchedWordIds = new Set();
 
 const promptSicilian = document.getElementById("prompt-sicilian");
 const promptEnglish = document.getElementById("prompt-english");
@@ -39,6 +41,8 @@ const startButton = document.getElementById("start-button");
 const ambienceToggle = document.getElementById("ambience-toggle");
 const hotspotStage = document.getElementById("hotspot-stage");
 const sceneWrapper = document.getElementById("scene-wrapper");
+const matchingPanel = document.getElementById("matching-panel");
+const matchingGrid = document.getElementById("matching-grid");
 
 const debugToggle = document.getElementById("debug-toggle");
 const editorToggle = document.getElementById("editor-toggle");
@@ -512,11 +516,107 @@ function setFeedback(message, type = "") {
   if (type) feedbackEl.classList.add(type);
 }
 
+function shuffleList(values) {
+  const copy = [...values];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function clearSelection() {
+  selectedWordId = null;
+  matchingGrid.querySelectorAll('.match-card.word').forEach((card) => {
+    card.classList.remove('selected');
+  });
+}
+
+function markPromptMatched(wordId) {
+  matchedWordIds.add(wordId);
+
+  const nextIndex = prompts.findIndex((prompt) => !matchedWordIds.has(prompt.id));
+  if (nextIndex === -1) {
+    finishGame();
+    return;
+  }
+
+  currentIndex = nextIndex;
+  updatePromptHud();
+  updatePopupInstruction();
+}
+
+function handleWordSelection(wordId, button) {
+  if (!gameActive) return;
+  clearSelection();
+  selectedWordId = wordId;
+  button.classList.add('selected');
+  setFeedback('Now tap the matching emoji.');
+}
+
+function handleEmojiSelection(wordId) {
+  if (!gameActive || !selectedWordId) {
+    setFeedback('Pick a Sicilian word first.');
+    return;
+  }
+
+  if (selectedWordId !== wordId) {
+    setFeedback('Not a match. Try again!', 'wrong');
+    showBaristaBubble("Pruvaci n'autra vota.");
+    return;
+  }
+
+  const wordCard = matchingGrid.querySelector(`.match-card.word[data-word-id="${wordId}"]`);
+  const emojiCard = matchingGrid.querySelector(`.match-card.emoji[data-word-id="${wordId}"]`);
+  if (wordCard) {
+    wordCard.classList.remove('selected');
+    wordCard.classList.add('matched');
+    wordCard.disabled = true;
+  }
+
+  if (emojiCard) {
+    emojiCard.classList.add('matched');
+    emojiCard.disabled = true;
+  }
+
+  selectedWordId = null;
+  setFeedback('Correct match!', 'correct');
+  showBaristaBubble('Bravu!');
+  markPromptMatched(wordId);
+}
+
+function renderMatchingGame() {
+  matchingGrid.textContent = '';
+  const words = prompts;
+  const emojis = shuffleList(prompts);
+
+  words.forEach((prompt) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'match-card word';
+    button.dataset.wordId = prompt.id;
+    button.textContent = prompt.sicilian;
+    button.addEventListener('click', () => handleWordSelection(prompt.id, button));
+    matchingGrid.appendChild(button);
+  });
+
+  emojis.forEach((prompt) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'match-card emoji';
+    button.dataset.wordId = prompt.id;
+    button.textContent = prompt.emoji;
+    button.setAttribute('aria-label', `Emoji for ${prompt.english}`);
+    button.addEventListener('click', () => handleEmojiSelection(prompt.id));
+    matchingGrid.appendChild(button);
+  });
+}
+
 function updatePromptHud() {
   if (!gameActive) {
     progressEl.textContent = `0/${prompts.length}`;
     promptSicilian.textContent = "Ready?";
-    promptEnglish.textContent = "Press Start Lesson to play.";
+    promptEnglish.textContent = "Tap to Start Game to play.";
     return;
   }
 
@@ -533,14 +633,18 @@ function updatePopupInstruction() {
   }
 
   const prompt = prompts[currentIndex];
-  popupInstruction.textContent = `Click on ${prompt.sicilian}`;
+  popupInstruction.textContent = `Match ${prompt.sicilian} with the right emoji`;
   lessonPopup.hidden = false;
 }
 
 function startGame() {
   gameActive = true;
   currentIndex = 0;
-  setFeedback("Find the object in the scene.");
+  selectedWordId = null;
+  matchedWordIds = new Set();
+  setFeedback("Tap a Sicilian word, then tap its matching emoji.");
+  renderMatchingGame();
+  matchingPanel.hidden = false;
   updatePromptHud();
   updatePopupInstruction();
   startButton.disabled = true;
@@ -549,35 +653,21 @@ function startGame() {
 function finishGame() {
   gameActive = false;
   lessonPopup.hidden = true;
-  setFeedback("Great! You matched all the words. Press Start Lesson to play again.", "correct");
+  setFeedback("Great! You matched all emojis and words. Tap to start again.", "correct");
   startButton.disabled = false;
   updatePromptHud();
 }
 
 function handleHotspotTap(objectId) {
   if (!gameActive) {
-    setFeedback("Explore the café, then press Start Lesson when you are ready.");
+    setFeedback("Tap to start the game, then match the words and emojis below.");
     return;
   }
 
-  const prompt = prompts[currentIndex];
-  if (objectId !== prompt.id) {
-    setFeedback(`Not quite — click on ${prompt.sicilian}.`, "wrong");
-    showBaristaBubble("Pruvaci n'autra vota.");
-    return;
-  }
+  const prompt = prompts.find((item) => item.id === objectId);
+  if (!prompt) return;
 
-  setFeedback("Correct!", "correct");
-  showBaristaBubble("Bravu!");
-
-  if (currentIndex === prompts.length - 1) {
-    finishGame();
-    return;
-  }
-
-  currentIndex += 1;
-  updatePromptHud();
-  updatePopupInstruction();
+  setFeedback(`You tapped ${prompt.sicilian}. Match it with ${prompt.emoji} below.`);
 }
 
 function bootCaffeScene() {
@@ -634,7 +724,7 @@ debugToggle.checked = debugMode;
 syncEditorVisibility();
 syncModeClasses();
 updatePromptHud();
-setFeedback("Take in the scene, then press Start Lesson when you are ready.");
+setFeedback("Take in the scene, then tap to start the game when you are ready.");
 updatePopupInstruction();
 updateAmbienceToggleLabel();
 if (ambienceEnabled) {

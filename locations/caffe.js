@@ -47,6 +47,7 @@ const editorSelection = document.getElementById("editor-selection");
 const hotspotNameInput = document.getElementById("hotspot-name");
 const saveHotspotButton = document.getElementById("save-hotspot");
 const editorOutput = document.getElementById("editor-output");
+const editorControls = document.getElementById("editor-controls");
 
 const lessonPopup = document.getElementById("lesson-popup");
 const popupInstruction = document.getElementById("popup-instruction");
@@ -59,7 +60,8 @@ let ambienceNodes = null;
 let ambienceOneshotTimer = null;
 let ambienceUnlockAttached = false;
 
-let debugMode = new URLSearchParams(window.location.search).has("debugHotspots");
+const params = new URLSearchParams(window.location.search);
+let debugMode = params.has("devtools") || params.has("debugHotspots");
 let editorMode = false;
 let isDrawing = false;
 let dragStartPercent = null;
@@ -105,6 +107,17 @@ function syncModeClasses() {
   document.body.classList.toggle("debug-hotspots", debugMode);
   document.body.classList.toggle("editor-mode", editorMode);
   editorLayer.hidden = !editorMode;
+}
+
+function syncEditorVisibility() {
+  const showControls = debugMode;
+  editorControls.hidden = !showControls;
+
+  if (!showControls && editorMode) {
+    editorMode = false;
+    editorToggle.checked = false;
+    editorSelection.hidden = true;
+  }
 }
 
 function hotspotToConfigLine(hotspot) {
@@ -221,6 +234,7 @@ function normalizeHotspot(hotspot) {
 }
 
 function loadPersistedHotspotConfig() {
+  if (!debugMode) return;
   try {
     const raw = localStorage.getItem(hotspotConfigStorageKey);
     if (!raw) return;
@@ -238,6 +252,7 @@ function loadPersistedHotspotConfig() {
 }
 
 function persistHotspotConfig() {
+  if (!debugMode) return;
   try {
     localStorage.setItem(hotspotConfigStorageKey, JSON.stringify(hotspotConfig));
   } catch {
@@ -585,10 +600,17 @@ ambienceToggle.addEventListener("click", () => {
 
 debugToggle.addEventListener("change", () => {
   debugMode = debugToggle.checked;
+  syncEditorVisibility();
   syncModeClasses();
 });
 
 editorToggle.addEventListener("change", () => {
+  if (!debugMode) {
+    editorToggle.checked = false;
+    editorMode = false;
+    return;
+  }
+
   editorMode = editorToggle.checked;
   editorSelection.hidden = true;
   syncModeClasses();
@@ -613,6 +635,7 @@ window.addEventListener("beforeunload", () => {
 loadPersistedHotspotConfig();
 renderHotspots();
 debugToggle.checked = debugMode;
+syncEditorVisibility();
 syncModeClasses();
 updatePromptHud();
 setFeedback("Loading lesson...");

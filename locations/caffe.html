@@ -19,20 +19,48 @@
         <button class="sound-toggle" id="ambience-toggle" type="button" aria-pressed="true">Caffè Sounds: On</button>
       </section>
 
-      <section class="hotspot-stage" aria-label="Cafe learning game hotspots">
-        <button class="hotspot hotspot-machine" data-object="machine" aria-label="Espresso machine"></button>
-        <button class="hotspot hotspot-cup" data-object="coffee" aria-label="Coffee cup on counter"></button>
-        <button class="hotspot hotspot-brioche" data-object="brioche" aria-label="Brioche pastry case"></button>
-        <button class="hotspot hotspot-barista" data-object="barista" aria-label="Barista"></button>
+      <section class="scene-panel" aria-label="Cafe learning game hotspots">
+        <div class="scene-wrapper" id="scene-wrapper">
+          <img
+            class="scene-image"
+            id="scene-image"
+            src="../assets/images/caffe_interior.png"
+            alt="Interior of a Sicilian cafe"
+          />
+          <div class="hotspot-stage" id="hotspot-stage"></div>
+          <div class="editor-layer" id="editor-layer" hidden>
+            <div class="editor-selection" id="editor-selection" hidden></div>
+          </div>
 
-        <div class="barista-bubble" id="barista-bubble" role="status" aria-live="polite" hidden>
-          Benvinutu! Chi vulissi?
+          <div class="barista-bubble" id="barista-bubble" role="status" aria-live="polite" hidden>
+            Benvinutu! Chi vulissi?
+          </div>
         </div>
       </section>
 
       <div class="lesson-popup" id="lesson-popup" role="status" aria-live="polite" hidden>
         <p class="instruction" id="popup-instruction">Click on U cafè</p>
       </div>
+
+      <section class="editor-controls" aria-label="Hotspot editor controls">
+        <label class="mode-toggle">
+          <input type="checkbox" id="debug-toggle" />
+          Debug Mode
+        </label>
+        <label class="mode-toggle">
+          <input type="checkbox" id="editor-toggle" />
+          Hotspot Editor
+        </label>
+        <label class="hotspot-name-label" for="hotspot-name">Hotspot name</label>
+        <select id="hotspot-name">
+          <option value="coffee">cup</option>
+          <option value="barista">barista</option>
+          <option value="brioche">brioche</option>
+          <option value="machine">espresso</option>
+        </select>
+        <button id="save-hotspot" type="button">Save hotspot</button>
+        <pre class="editor-output" id="editor-output">Draw a hotspot to see percentages.</pre>
+      </section>
     </main>
 
     <script src="caffe.js"></script>

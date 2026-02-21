@@ -16,7 +16,7 @@ const hotspotNameToObject = {
 
 let hotspotConfig = [
   { name: "espresso", objectId: "machine", left: 89, top: 37, width: 11, height: 17 },
-  { name: "cup", objectId: "coffee", left: 63, top: 49, width: 8, height: 11 },
+  { name: "cup", objectId: "coffee", left: 61.8, top: 49.5, width: 5.2, height: 7.2 },
   { name: "brioche", objectId: "brioche", left: 71, top: 47, width: 21, height: 17 },
   { name: "barista", objectId: "barista", left: 53, top: 30, width: 21, height: 28 },
 ];
@@ -61,8 +61,7 @@ let ambienceOneshotTimer = null;
 let ambienceUnlockAttached = false;
 
 const params = new URLSearchParams(window.location.search);
-const isLocalDebugHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-let debugMode = isLocalDebugHost && (params.has("devtools") || params.has("debugHotspots"));
+let debugMode = params.has("devtools") || params.has("debugHotspots");
 let editorMode = false;
 let isDrawing = false;
 let dragStartPercent = null;
@@ -564,12 +563,12 @@ function handleHotspotTap(objectId) {
   const prompt = prompts[currentIndex];
   if (objectId !== prompt.id) {
     setFeedback(`Not quite — click on ${prompt.sicilian}.`, "wrong");
-    showBaristaBubble("Try again.");
+    showBaristaBubble("Pruvaci n'autra vota.");
     return;
   }
 
   setFeedback("Correct!", "correct");
-  showBaristaBubble("Good job!");
+  showBaristaBubble("Bravu!");
 
   if (currentIndex === prompts.length - 1) {
     finishGame();
@@ -583,7 +582,7 @@ function handleHotspotTap(objectId) {
 
 function bootCaffeScene() {
   greetingTimer = setTimeout(() => {
-    showBaristaBubble("Welcome! What would you like?", baristaGreetingDurationMs);
+    showBaristaBubble("Bongiornu! Chi disii?", baristaGreetingDurationMs);
   }, baristaGreetingDelayMs);
 }
 

@@ -24,6 +24,7 @@ let hotspotConfig = [
 const autoStartDelayMs = 900;
 const baristaGreetingDelayMs = 700;
 const ambiencePrefKey = "accussi_caffe_ambience_enabled";
+const hotspotConfigStorageKey = "accussi_caffe_hotspot_config";
 
 let currentIndex = 0;
 let gameActive = false;
@@ -191,7 +192,57 @@ function saveLatestHotspot() {
   }
 
   renderHotspots();
+  persistHotspotConfig();
   writeEditorOutput(latestDrawnHotspot);
+  editorOutput.textContent += "\nSaved locally. Refresh to verify it persists.";
+}
+
+function normalizeHotspot(hotspot) {
+  if (!hotspot || typeof hotspot !== "object") return null;
+
+  const name = typeof hotspot.name === "string" ? hotspot.name.trim() : "";
+  const objectId = typeof hotspot.objectId === "string" ? hotspot.objectId.trim() : "";
+  const left = Number(hotspot.left);
+  const top = Number(hotspot.top);
+  const width = Number(hotspot.width);
+  const height = Number(hotspot.height);
+
+  if (!name || !objectId) return null;
+  if (![left, top, width, height].every(Number.isFinite)) return null;
+
+  return {
+    name,
+    objectId,
+    left: roundPct(clampPercent(left)),
+    top: roundPct(clampPercent(top)),
+    width: roundPct(clampPercent(width)),
+    height: roundPct(clampPercent(height)),
+  };
+}
+
+function loadPersistedHotspotConfig() {
+  try {
+    const raw = localStorage.getItem(hotspotConfigStorageKey);
+    if (!raw) return;
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return;
+
+    const normalized = parsed.map(normalizeHotspot).filter(Boolean);
+    if (!normalized.length) return;
+
+    hotspotConfig = normalized;
+  } catch {
+    // Ignore storage or parse failures.
+  }
+}
+
+function persistHotspotConfig() {
+  try {
+    localStorage.setItem(hotspotConfigStorageKey, JSON.stringify(hotspotConfig));
+  } catch {
+    // Ignore storage failures in restricted browsers.
+  }
 }
 
 function loadAmbienceEnabled() {
@@ -559,6 +610,7 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
+loadPersistedHotspotConfig();
 renderHotspots();
 debugToggle.checked = debugMode;
 syncModeClasses();

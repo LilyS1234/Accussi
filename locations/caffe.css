@@ -90,20 +90,6 @@ body {
   cursor: pointer;
 }
 
-.sound-toggle {
-  margin-top: 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-weight: 700;
-  padding: 0.52rem 0.82rem;
-  cursor: pointer;
-}
-
-.sound-toggle[aria-pressed="false"] {
-  opacity: 0.75;
-}
 
 .scene-panel {
   min-height: 100vh;
@@ -181,7 +167,7 @@ body {
 .lesson-popup {
   position: fixed;
   left: 50%;
-  bottom: 1.25rem;
+  bottom: 12.5rem;
   transform: translateX(-50%);
   z-index: 7;
   background: rgba(23, 23, 28, 0.92);
@@ -254,8 +240,10 @@ body {
 
 .matching-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.55rem;
+  grid-template-columns: minmax(180px, 1fr) minmax(100px, 140px);
+  column-gap: 0.8rem;
+  row-gap: 0.55rem;
+  align-items: stretch;
 }
 
 .match-card {
@@ -275,6 +263,7 @@ body {
 
 .match-card.emoji {
   font-size: 1.55rem;
+  text-align: center;
 }
 
 .match-card.selected {
@@ -286,4 +275,14 @@ body {
   background: rgba(83, 212, 131, 0.23);
   border-color: rgba(140, 255, 182, 0.8);
   cursor: default;
+}
+
+@media (max-width: 760px) {
+  .lesson-popup {
+    bottom: 13.8rem;
+  }
+
+  .matching-grid {
+    grid-template-columns: 1fr 88px;
+  }
 }

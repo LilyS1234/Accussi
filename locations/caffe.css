@@ -126,11 +126,11 @@ body {
   height: auto;
 }
 
-.hotspot-stage,
-.editor-layer {
+.hotspot-stage {
   position: absolute;
   inset: 0;
 }
+
 
 .hotspot {
   position: absolute;
@@ -145,26 +145,9 @@ body {
   background: rgba(255, 216, 128, 0.2);
 }
 
-.debug-hotspots .hotspot {
-  background: rgba(255, 216, 128, 0.25);
-  border: 2px dashed rgba(255, 216, 128, 0.95);
-}
 
-.editor-mode .hotspot {
-  border: 2px solid rgba(64, 170, 255, 0.85);
-  background: rgba(64, 170, 255, 0.18);
-}
 
-.editor-layer {
-  cursor: crosshair;
-  z-index: 4;
-}
 
-.editor-selection {
-  position: absolute;
-  border: 2px solid #60f0ab;
-  background: rgba(96, 240, 171, 0.24);
-}
 
 .barista-bubble {
   position: absolute;
@@ -213,51 +196,10 @@ body {
   font-weight: 700;
 }
 
-.editor-controls {
-  position: fixed;
-  left: 1rem;
-  bottom: 1rem;
-  z-index: 8;
-  width: min(430px, calc(100vw - 2rem));
-  background: rgba(0, 0, 0, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
-  padding: 0.75rem;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-}
 
-.mode-toggle,
-.hotspot-name-label {
-  font-size: 0.88rem;
-  font-weight: 650;
-}
 
-.editor-controls select,
-.editor-controls button {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  padding: 0.45rem 0.55rem;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
 
-.editor-controls option {
-  color: #111;
-}
 
-.editor-output {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: 0.45rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  max-height: 132px;
-  overflow: auto;
-  font-size: 0.74rem;
-  white-space: pre-wrap;
-}
 
 @media (max-width: 760px) {
   .game-hud {
@@ -281,10 +223,6 @@ body {
     top: 14%;
     max-width: min(220px, 48vw);
     font-size: 0.95rem;
-  }
-
-  .editor-controls {
-    bottom: 1rem;
   }
 }
 

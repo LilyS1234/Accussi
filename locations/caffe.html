@@ -28,9 +28,6 @@
             alt="Interior of a Sicilian cafe"
           />
           <div class="hotspot-stage" id="hotspot-stage"></div>
-          <div class="editor-layer" id="editor-layer" hidden>
-            <div class="editor-selection" id="editor-selection" hidden></div>
-          </div>
 
           <div class="barista-bubble" id="barista-bubble" role="status" aria-live="polite" hidden>
             Bongiornu! Chi disii?
@@ -47,26 +44,6 @@
       <div class="lesson-popup" id="lesson-popup" role="status" aria-live="polite" hidden>
         <p class="instruction" id="popup-instruction">Click on U cafè</p>
       </div>
-
-      <section class="editor-controls" id="editor-controls" aria-label="Hotspot editor controls" hidden>
-        <label class="mode-toggle">
-          <input type="checkbox" id="debug-toggle" />
-          Debug Mode
-        </label>
-        <label class="mode-toggle">
-          <input type="checkbox" id="editor-toggle" />
-          Hotspot Editor
-        </label>
-        <label class="hotspot-name-label" for="hotspot-name">Hotspot name</label>
-        <select id="hotspot-name">
-          <option value="coffee">cup</option>
-          <option value="barista">barista</option>
-          <option value="brioche">brioche</option>
-          <option value="machine">espresso</option>
-        </select>
-        <button id="save-hotspot" type="button">Save hotspot</button>
-        <pre class="editor-output" id="editor-output">Draw a hotspot to see percentages.</pre>
-      </section>
     </main>
 
     <script src="caffe.js"></script>

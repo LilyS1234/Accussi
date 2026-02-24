@@ -11,6 +11,7 @@ const vocabulary = {
 };
 
 const providedSceneImage = "assets/images/scenes/village-map-provided.png";
+const vineyardSceneImage = "assets/images/vineyard.png";
 const introSceneId = "flight-to-sicily";
 const mapSceneId = "map";
 const mapMusicSrc = "assets/audio/pixel-passeggiata.mp3";
@@ -20,6 +21,48 @@ let introFlightAudio = null;
 let mapMusicAudio = null;
 let mapMusicPrimed = false;
 let mapMusicUnlockListenersAttached = false;
+
+const vineyardGamePrompts = [
+  {
+    prompt: "A ___ è duci.",
+    choices: ["racina", "limuna"],
+    correctChoice: "racina",
+  },
+  {
+    prompt: "U viddanu metti a racina ntra u ___.",
+    choices: ["panaru", "suli"],
+    correctChoice: "panaru",
+  },
+  {
+    prompt: "Pi fari vinu, cogghimu a ___.",
+    choices: ["racina", "acqua"],
+    correctChoice: "racina",
+  },
+  {
+    prompt: "A vigna voli suli e ___.",
+    choices: ["acqua", "pisci"],
+    correctChoice: "acqua",
+  },
+  {
+    prompt: "Angelo dici: Cogghi a ___ matura!",
+    choices: ["racina", "littra"],
+    correctChoice: "racina",
+  },
+  {
+    prompt: "Doppu a vindemmia, purtamu u ___.",
+    choices: ["panaru", "cafi"],
+    correctChoice: "panaru",
+  },
+];
+
+const vineyardGameState = {
+  isActive: false,
+  round: 0,
+  score: 0,
+  basketGrapes: 0,
+  groundGrapes: 0,
+  prompts: [],
+};
 
 const sceneTemplate = (id, name, description, image, vocabId) => ({
   id,
@@ -62,7 +105,13 @@ const scenes = {
       { type: "scene", targetSceneId: "posta", label: "La Posta", left: 52, top: 48, width: 10, height: 12 },
     ],
   },
-  vineyard: sceneTemplate("vineyard", "A Vigna", "Rows of vines and harvest words.", providedSceneImage, "racina"),
+  vineyard: {
+    ...sceneTemplate("vineyard", "A Vigna", "Rows of vines and harvest words.", vineyardSceneImage, "racina"),
+    hotspots: [
+      { type: "vocab", vocabId: "racina", label: vocabulary.racina.sicilian, left: 52, top: 58, width: 20, height: 23 },
+      { type: "scene", targetSceneId: mapSceneId, label: "Torna ô paisi", left: 2, top: 4, width: 22, height: 14 },
+    ],
+  },
   piazza: sceneTemplate("piazza", "A Chiazza", "Water, stone, and conversation.", providedSceneImage, "acqua"),
   "lemon-grove": sceneTemplate("lemon-grove", "U Giardini di Limuna", "Trees and citrus in warm light.", providedSceneImage, "limuna"),
   "nonnas-kitchen": sceneTemplate("nonnas-kitchen", "A Cucina di Nonna", "Family cooking and home language.", providedSceneImage, "pani"),
@@ -184,6 +233,117 @@ function renderScene() {
     button.addEventListener("click", () => onHotspotInteract(hotspot));
     hotspotLayerEl.appendChild(button);
   });
+
+  if (scene.id === "vineyard") {
+    renderVineyardCharacter();
+    renderVineyardGameLauncher();
+    if (vineyardGameState.isActive) renderVineyardGameOverlay();
+  }
+}
+
+function renderVineyardCharacter() {
+  const bubbleWrap = document.createElement("div");
+  bubbleWrap.className = "vineyard-character-wrap";
+
+  const speechBubble = document.createElement("div");
+  speechBubble.className = "vineyard-bubble";
+  speechBubble.textContent = "Ciau! Sugnu Angelo! È tempu di cogghiri i racini!";
+  speechBubble.setAttribute("aria-label", "Angelo says hello and invites the player to pick grapes.");
+  bubbleWrap.appendChild(speechBubble);
+
+  hotspotLayerEl.appendChild(bubbleWrap);
+}
+
+function renderVineyardGameLauncher() {
+  const startButton = document.createElement("button");
+  startButton.type = "button";
+  startButton.className = "vineyard-game-start";
+  startButton.textContent = vineyardGameState.isActive ? "Game Running" : "Start Dui Panara";
+  startButton.disabled = vineyardGameState.isActive;
+  startButton.addEventListener("click", () => {
+    startVineyardGame();
+    renderScene();
+  });
+
+  hotspotLayerEl.appendChild(startButton);
+}
+
+function startVineyardGame() {
+  vineyardGameState.isActive = true;
+  vineyardGameState.round = 0;
+  vineyardGameState.score = 0;
+  vineyardGameState.basketGrapes = 0;
+  vineyardGameState.groundGrapes = 0;
+  vineyardGameState.prompts = shuffleArray(vineyardGamePrompts).slice(0, 5);
+}
+
+function renderVineyardGameOverlay() {
+  const panel = document.createElement("section");
+  panel.className = "vineyard-game-panel";
+
+  if (vineyardGameState.round >= vineyardGameState.prompts.length) {
+    panel.innerHTML = `
+      <h3>Vendemmia finita!</h3>
+      <p>Punti: <strong>${vineyardGameState.score}</strong> / ${vineyardGameState.prompts.length}</p>
+      <p>🍇 Ntô panaru: <strong>${vineyardGameState.basketGrapes}</strong> &nbsp;|&nbsp; 🍇 Nterra: <strong>${vineyardGameState.groundGrapes}</strong></p>
+    `;
+
+    const restartButton = document.createElement("button");
+    restartButton.type = "button";
+    restartButton.className = "scene-button";
+    restartButton.textContent = "Play Again";
+    restartButton.addEventListener("click", () => {
+      startVineyardGame();
+      renderScene();
+    });
+    panel.appendChild(restartButton);
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "scene-button";
+    closeButton.textContent = "Close";
+    closeButton.addEventListener("click", () => {
+      vineyardGameState.isActive = false;
+      renderScene();
+    });
+    panel.appendChild(closeButton);
+
+    hotspotLayerEl.appendChild(panel);
+    return;
+  }
+
+  const roundData = vineyardGameState.prompts[vineyardGameState.round];
+  panel.innerHTML = `
+    <h3>Dui Panara</h3>
+    <p class="vineyard-game-progress">Round ${vineyardGameState.round + 1} / ${vineyardGameState.prompts.length}</p>
+    <p class="vineyard-game-prompt">${roundData.prompt}</p>
+    <p class="vineyard-game-score">🍇 Ntô panaru: <strong>${vineyardGameState.basketGrapes}</strong> &nbsp;|&nbsp; 🍇 Nterra: <strong>${vineyardGameState.groundGrapes}</strong></p>
+  `;
+
+  const baskets = document.createElement("div");
+  baskets.className = "vineyard-baskets";
+
+  roundData.choices.forEach((choice) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "vineyard-basket";
+    button.innerHTML = `<span class="vineyard-basket-icon">🧺</span><span>${choice}</span>`;
+    button.addEventListener("click", () => {
+      const isCorrect = choice === roundData.correctChoice;
+      if (isCorrect) {
+        vineyardGameState.score += 1;
+        vineyardGameState.basketGrapes += 3;
+      } else {
+        vineyardGameState.groundGrapes += 2;
+      }
+      vineyardGameState.round += 1;
+      renderScene();
+    });
+    baskets.appendChild(button);
+  });
+
+  panel.appendChild(baskets);
+  hotspotLayerEl.appendChild(panel);
 }
 
 function renderIntroScene() {
@@ -430,4 +590,13 @@ function loadMusicEnabled() {
 
 function persistMusicEnabled(enabled) {
   localStorage.setItem(musicPrefKey, String(Boolean(enabled)));
+}
+
+function shuffleArray(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }

@@ -40,9 +40,19 @@
         <div class="matching-grid" id="matching-grid"></div>
       </section>
 
-      <div class="lesson-popup" id="lesson-popup" role="status" aria-live="polite" hidden>
-        <p class="instruction" id="popup-instruction">Click on U cafè</p>
+      <div class="result-modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
+        <div class="result-card">
+          <button class="result-close" id="result-close" type="button" aria-label="Close game result">×</button>
+          <h2 class="result-title" id="result-title">Bravu!</h2>
+          <p class="result-score" id="result-score">Score: 0/4</p>
+          <p class="result-message" id="result-message">You finished the game.</p>
+          <div class="result-actions">
+            <button class="result-action primary" id="result-start-over" type="button">Start Over</button>
+            <button class="result-action" id="result-dismiss" type="button">Close</button>
+          </div>
+        </div>
       </div>
+
     </main>
 
     <script src="caffe.js"></script>

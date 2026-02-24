@@ -21,6 +21,7 @@ let gameActive = false;
 let greetingTimer = null;
 let selectedWordId = null;
 let matchedWordIds = new Set();
+let hasPlayed = false;
 
 const promptSicilian = document.getElementById("prompt-sicilian");
 const promptEnglish = document.getElementById("prompt-english");
@@ -30,10 +31,13 @@ const startButton = document.getElementById("start-button");
 const hotspotStage = document.getElementById("hotspot-stage");
 const matchingPanel = document.getElementById("matching-panel");
 const matchingGrid = document.getElementById("matching-grid");
+const resultModal = document.getElementById("result-modal");
+const resultScore = document.getElementById("result-score");
+const resultMessage = document.getElementById("result-message");
+const resultCloseButton = document.getElementById("result-close");
+const resultDismissButton = document.getElementById("result-dismiss");
+const resultStartOverButton = document.getElementById("result-start-over");
 
-
-const lessonPopup = document.getElementById("lesson-popup");
-const popupInstruction = document.getElementById("popup-instruction");
 const baristaBubble = document.getElementById("barista-bubble");
 let baristaBubbleTimer = null;
 
@@ -110,7 +114,6 @@ function markPromptMatched(wordId) {
 
   currentIndex = nextIndex;
   updatePromptHud();
-  updatePopupInstruction();
 }
 
 function handleWordSelection(wordId, button) {
@@ -177,11 +180,33 @@ function renderMatchingGame() {
   });
 }
 
+function hideResultModal() {
+  if (!resultModal) return;
+  resultModal.hidden = true;
+}
+
+function showResultModal() {
+  if (!resultModal || !resultScore || !resultMessage) return;
+  const score = matchedWordIds.size;
+  resultScore.textContent = `Score: ${score}/${prompts.length}`;
+  resultMessage.textContent = score === prompts.length
+    ? "Bravissimu! You matched everything."
+    : "Good try! Hit Start Over for another round.";
+  resultModal.hidden = false;
+}
+
+function closeGamePanel() {
+  gameActive = false;
+  matchingPanel.hidden = true;
+  clearSelection();
+  updatePromptHud();
+}
+
 function updatePromptHud() {
   if (!gameActive) {
     progressEl.textContent = `0/${prompts.length}`;
     promptSicilian.textContent = "Ready?";
-    promptEnglish.textContent = "Tap to Start Game to play.";
+    promptEnglish.textContent = hasPlayed ? "Tap Start Over to play again." : "Tap to Start Game to play.";
     return;
   }
 
@@ -191,18 +216,8 @@ function updatePromptHud() {
   promptEnglish.textContent = prompt.english;
 }
 
-function updatePopupInstruction() {
-  if (!gameActive) {
-    lessonPopup.hidden = true;
-    return;
-  }
-
-  const prompt = prompts[currentIndex];
-  popupInstruction.textContent = `Match ${prompt.sicilian} with the right emoji`;
-  lessonPopup.hidden = false;
-}
-
 function startGame() {
+  hideResultModal();
   gameActive = true;
   currentIndex = 0;
   selectedWordId = null;
@@ -211,16 +226,15 @@ function startGame() {
   renderMatchingGame();
   matchingPanel.hidden = false;
   updatePromptHud();
-  updatePopupInstruction();
-  startButton.disabled = true;
+  startButton.textContent = "Start Over";
+  hasPlayed = true;
 }
 
 function finishGame() {
-  gameActive = false;
-  lessonPopup.hidden = true;
-  setFeedback("Great! You matched all emojis and words. Tap to start again.", "correct");
-  startButton.disabled = false;
-  updatePromptHud();
+  setFeedback("Great! You matched all emojis and words.", "correct");
+  closeGamePanel();
+  startButton.textContent = "Start Over";
+  showResultModal();
 }
 
 function handleHotspotTap(objectId) {
@@ -242,10 +256,20 @@ function bootCaffeScene() {
 }
 
 startButton.addEventListener("click", () => {
-  if (gameActive) return;
   startGame();
 });
 
+if (resultCloseButton) {
+  resultCloseButton.addEventListener("click", hideResultModal);
+}
+
+if (resultDismissButton) {
+  resultDismissButton.addEventListener("click", hideResultModal);
+}
+
+if (resultStartOverButton) {
+  resultStartOverButton.addEventListener("click", startGame);
+}
 
 window.addEventListener("beforeunload", () => {
   if (greetingTimer) clearTimeout(greetingTimer);
@@ -255,5 +279,4 @@ window.addEventListener("beforeunload", () => {
 renderHotspots();
 updatePromptHud();
 setFeedback("Take in the scene, then tap to start the game when you are ready.");
-updatePopupInstruction();
 bootCaffeScene();

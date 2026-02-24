@@ -272,6 +272,102 @@ body {
   background: #f9f0df;
 }
 
+.vineyard-basket:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .vineyard-basket-icon {
   font-size: 1.35rem;
+}
+
+.vineyard-game-combo {
+  font-size: 0.92rem;
+  color: #5f3612;
+}
+
+.vineyard-playfield {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  align-items: end;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(80, 53, 24, 0.14);
+  border-radius: 12px;
+  padding: 0.5rem;
+}
+
+.vineyard-drop-basket,
+.vineyard-drop-ground {
+  text-align: center;
+}
+
+.vineyard-drop-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.vineyard-drop-target {
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.vineyard-grape-stack {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  min-height: 2.1rem;
+  word-break: break-word;
+}
+
+.vineyard-grape-stack.ground {
+  opacity: 0.88;
+}
+
+.vineyard-drop-ground {
+  grid-column: 1 / -1;
+  border-top: 1px dashed rgba(80, 53, 24, 0.28);
+  padding-top: 0.35rem;
+}
+
+.grape-drop {
+  position: absolute;
+  font-size: 1.35rem;
+  pointer-events: none;
+  z-index: 15;
+  animation: grapeDropArc 760ms cubic-bezier(0.18, 0.84, 0.28, 1) forwards;
+}
+
+.grape-drop.golden {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 94, 0.86));
+}
+
+.points-float {
+  position: absolute;
+  pointer-events: none;
+  transform: translateX(-50%);
+  z-index: 16;
+  font-weight: 700;
+  animation: pointsPop 760ms ease-out forwards;
+}
+
+.points-float.correct {
+  color: #236c30;
+}
+
+.points-float.wrong {
+  color: #8b2319;
+}
+
+@keyframes grapeDropArc {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.95; }
+  60% { transform: translate(calc(var(--drop-x) * 0.66), calc(var(--drop-y) * 0.66 - 14px)) scale(1.1); opacity: 1; }
+  100% { transform: translate(var(--drop-x), var(--drop-y)) scale(0.92); opacity: 0.9; }
+}
+
+@keyframes pointsPop {
+  0% { transform: translate(-50%, 0) scale(0.7); opacity: 0; }
+  20% { transform: translate(-50%, -8px) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -30px) scale(0.95); opacity: 0; }
 }

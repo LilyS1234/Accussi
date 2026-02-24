@@ -60,7 +60,13 @@ const vineyardGameState = {
   round: 0,
   score: 0,
   basketGrapes: 0,
+  leftBasketGrapes: 0,
+  rightBasketGrapes: 0,
   groundGrapes: 0,
+  comboStreak: 0,
+  maxCombo: 0,
+  nextBasketTarget: "left",
+  isResolvingAnswer: false,
   prompts: [],
 };
 
@@ -273,8 +279,87 @@ function startVineyardGame() {
   vineyardGameState.round = 0;
   vineyardGameState.score = 0;
   vineyardGameState.basketGrapes = 0;
+  vineyardGameState.leftBasketGrapes = 0;
+  vineyardGameState.rightBasketGrapes = 0;
   vineyardGameState.groundGrapes = 0;
+  vineyardGameState.comboStreak = 0;
+  vineyardGameState.maxCombo = 0;
+  vineyardGameState.nextBasketTarget = "left";
+  vineyardGameState.isResolvingAnswer = false;
   vineyardGameState.prompts = shuffleArray(vineyardGamePrompts).slice(0, 5);
+}
+
+function getVineyardGrapePile(grapeCount, maxVisible = 18) {
+  const visible = Math.min(grapeCount, maxVisible);
+  const hidden = grapeCount - visible;
+  const pile = "🍇".repeat(visible);
+  return hidden > 0 ? `${pile} +${hidden}` : pile || "·";
+}
+
+function playVineyardTone(type) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const context = new AudioCtx();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = type === "wrong" ? "square" : "triangle";
+    oscillator.frequency.value = type === "wrong" ? 170 : 540;
+    gain.gain.value = 0.001;
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    const now = context.currentTime;
+    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+    oscillator.start(now);
+    oscillator.stop(now + 0.22);
+    setTimeout(() => context.close().catch(() => {}), 280);
+  } catch {
+    // no-op audio fallback
+  }
+}
+
+function animateVineyardDrop(sourceButton, isCorrect, isGolden, pointsDelta) {
+  const sourceRect = sourceButton.getBoundingClientRect();
+  const layerRect = hotspotLayerEl.getBoundingClientRect();
+  const targetSelector = isCorrect
+    ? `.vineyard-drop-basket-${vineyardGameState.nextBasketTarget}`
+    : ".vineyard-drop-ground";
+  const target = hotspotLayerEl.querySelector(targetSelector);
+
+  if (!target) return Promise.resolve();
+
+  const targetRect = target.getBoundingClientRect();
+  const sourceX = sourceRect.left + sourceRect.width / 2 - layerRect.left;
+  const sourceY = sourceRect.top + sourceRect.height / 2 - layerRect.top;
+  const targetX = targetRect.left + targetRect.width / 2 - layerRect.left;
+  const targetY = targetRect.top + targetRect.height / 2 - layerRect.top;
+  const grape = document.createElement("span");
+  grape.className = `grape-drop${isGolden ? " golden" : ""}`;
+  grape.textContent = "🍇";
+  grape.style.left = `${sourceX}px`;
+  grape.style.top = `${sourceY}px`;
+  grape.style.setProperty("--drop-x", `${targetX - sourceX}px`);
+  grape.style.setProperty("--drop-y", `${targetY - sourceY}px`);
+
+  const points = document.createElement("span");
+  points.className = `points-float ${isCorrect ? "correct" : "wrong"}`;
+  points.textContent = `${pointsDelta > 0 ? "+" : ""}${pointsDelta}`;
+  points.style.left = `${targetX}px`;
+  points.style.top = `${targetRect.top - layerRect.top + 8}px`;
+
+  hotspotLayerEl.appendChild(grape);
+  hotspotLayerEl.appendChild(points);
+
+  playVineyardTone(isCorrect ? "correct" : "wrong");
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      grape.remove();
+      points.remove();
+      resolve();
+    }, 780);
+  });
 }
 
 function renderVineyardGameOverlay() {
@@ -284,7 +369,8 @@ function renderVineyardGameOverlay() {
   if (vineyardGameState.round >= vineyardGameState.prompts.length) {
     panel.innerHTML = `
       <h3>Vendemmia finita!</h3>
-      <p>Punti: <strong>${vineyardGameState.score}</strong> / ${vineyardGameState.prompts.length}</p>
+      <p>Punti finali: <strong>${vineyardGameState.score}</strong> ( +3/+combo in panaru, -2 quannu nterra )</p>
+      <p>Megghiu combo: <strong>x${vineyardGameState.maxCombo}</strong></p>
       <p>🍇 Ntô panaru: <strong>${vineyardGameState.basketGrapes}</strong> &nbsp;|&nbsp; 🍇 Nterra: <strong>${vineyardGameState.groundGrapes}</strong></p>
     `;
 
@@ -317,8 +403,29 @@ function renderVineyardGameOverlay() {
     <h3>Dui Panara</h3>
     <p class="vineyard-game-progress">Round ${vineyardGameState.round + 1} / ${vineyardGameState.prompts.length}</p>
     <p class="vineyard-game-prompt">${roundData.prompt}</p>
+    <p class="vineyard-game-combo">Combo: <strong>x${vineyardGameState.comboStreak}</strong></p>
     <p class="vineyard-game-score">🍇 Ntô panaru: <strong>${vineyardGameState.basketGrapes}</strong> &nbsp;|&nbsp; 🍇 Nterra: <strong>${vineyardGameState.groundGrapes}</strong></p>
   `;
+
+  const playfield = document.createElement("div");
+  playfield.className = "vineyard-playfield";
+  playfield.innerHTML = `
+    <div class="vineyard-drop-basket vineyard-drop-basket-left">
+      <p class="vineyard-drop-label">Panaru manca ${vineyardGameState.comboStreak >= 3 ? "😎" : "🙂"}</p>
+      <div class="vineyard-drop-target" aria-hidden="true">🧺</div>
+      <p class="vineyard-grape-stack">${getVineyardGrapePile(vineyardGameState.leftBasketGrapes)}</p>
+    </div>
+    <div class="vineyard-drop-basket vineyard-drop-basket-right">
+      <p class="vineyard-drop-label">Panaru dritta ${vineyardGameState.comboStreak >= 3 ? "🤩" : "🙂"}</p>
+      <div class="vineyard-drop-target" aria-hidden="true">🧺</div>
+      <p class="vineyard-grape-stack">${getVineyardGrapePile(vineyardGameState.rightBasketGrapes)}</p>
+    </div>
+    <div class="vineyard-drop-ground">
+      <p class="vineyard-drop-label">Nterra ${vineyardGameState.groundGrapes > 0 ? "😬" : "🌱"}</p>
+      <p class="vineyard-grape-stack ground">${getVineyardGrapePile(vineyardGameState.groundGrapes, 12)}</p>
+    </div>
+  `;
+  panel.appendChild(playfield);
 
   const baskets = document.createElement("div");
   baskets.className = "vineyard-baskets";
@@ -328,15 +435,41 @@ function renderVineyardGameOverlay() {
     button.type = "button";
     button.className = "vineyard-basket";
     button.innerHTML = `<span class="vineyard-basket-icon">🧺</span><span>${choice}</span>`;
-    button.addEventListener("click", () => {
+    button.disabled = vineyardGameState.isResolvingAnswer;
+    button.addEventListener("click", async () => {
+      if (vineyardGameState.isResolvingAnswer) return;
+      vineyardGameState.isResolvingAnswer = true;
       const isCorrect = choice === roundData.correctChoice;
+      let pointsDelta = -2;
+      let grapesAwarded = 0;
+      let isGolden = false;
+
       if (isCorrect) {
-        vineyardGameState.score += 1;
-        vineyardGameState.basketGrapes += 3;
+        vineyardGameState.comboStreak += 1;
+        vineyardGameState.maxCombo = Math.max(vineyardGameState.maxCombo, vineyardGameState.comboStreak);
+        const comboBonus = vineyardGameState.comboStreak >= 2 ? 1 : 0;
+        isGolden = vineyardGameState.comboStreak % 4 === 0;
+        const goldenBonus = isGolden ? 2 : 0;
+        grapesAwarded = 3 + comboBonus + goldenBonus;
+        pointsDelta = grapesAwarded;
+        vineyardGameState.score += pointsDelta;
+        vineyardGameState.basketGrapes += grapesAwarded;
+        if (vineyardGameState.nextBasketTarget === "left") {
+          vineyardGameState.leftBasketGrapes += grapesAwarded;
+          vineyardGameState.nextBasketTarget = "right";
+        } else {
+          vineyardGameState.rightBasketGrapes += grapesAwarded;
+          vineyardGameState.nextBasketTarget = "left";
+        }
       } else {
+        vineyardGameState.comboStreak = 0;
+        vineyardGameState.score -= 2;
         vineyardGameState.groundGrapes += 2;
       }
+
+      await animateVineyardDrop(button, isCorrect, isGolden, pointsDelta);
       vineyardGameState.round += 1;
+      vineyardGameState.isResolvingAnswer = false;
       renderScene();
     });
     baskets.appendChild(button);

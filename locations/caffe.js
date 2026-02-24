@@ -5,15 +5,6 @@ const prompts = [
   { id: "machine", sicilian: "A machina dû cafè", english: "The espresso machine", emoji: "🫖" },
 ];
 
-const hotspotNameToObject = {
-  espresso: "machine",
-  cup: "coffee",
-  brioche: "brioche",
-  barista: "barista",
-  machine: "machine",
-  coffee: "coffee",
-};
-
 let hotspotConfig = [
   { name: "espresso", objectId: "machine", left: 89, top: 37, width: 11, height: 17 },
   { name: "cup", objectId: "coffee", left: 61.8, top: 49.5, width: 5.2, height: 7.2 },
@@ -25,7 +16,6 @@ const baristaGreetingDelayMs = 3200;
 const baristaGreetingDurationMs = 3600;
 const lessonFeedbackBubbleDurationMs = 1800;
 const ambiencePrefKey = "accussi_caffe_ambience_enabled";
-const hotspotConfigStorageKey = "accussi_caffe_hotspot_config";
 
 let currentIndex = 0;
 let gameActive = false;
@@ -40,18 +30,9 @@ const feedbackEl = document.getElementById("feedback");
 const startButton = document.getElementById("start-button");
 const ambienceToggle = document.getElementById("ambience-toggle");
 const hotspotStage = document.getElementById("hotspot-stage");
-const sceneWrapper = document.getElementById("scene-wrapper");
 const matchingPanel = document.getElementById("matching-panel");
 const matchingGrid = document.getElementById("matching-grid");
 
-const debugToggle = document.getElementById("debug-toggle");
-const editorToggle = document.getElementById("editor-toggle");
-const editorLayer = document.getElementById("editor-layer");
-const editorSelection = document.getElementById("editor-selection");
-const hotspotNameInput = document.getElementById("hotspot-name");
-const saveHotspotButton = document.getElementById("save-hotspot");
-const editorOutput = document.getElementById("editor-output");
-const editorControls = document.getElementById("editor-controls");
 
 const lessonPopup = document.getElementById("lesson-popup");
 const popupInstruction = document.getElementById("popup-instruction");
@@ -64,27 +45,8 @@ let ambienceNodes = null;
 let ambienceOneshotTimer = null;
 let ambienceUnlockAttached = false;
 
-const params = new URLSearchParams(window.location.search);
-let debugMode = params.has("devtools") || params.has("debugHotspots");
-let editorMode = false;
-let isDrawing = false;
-let dragStartPercent = null;
-let latestDrawnHotspot = null;
 
-function clampPercent(value) {
-  return Math.max(0, Math.min(100, value));
-}
 
-function roundPct(value) {
-  return Number(value.toFixed(2));
-}
-
-function calculatePercentPoint(event) {
-  const rect = sceneWrapper.getBoundingClientRect();
-  const x = clampPercent(((event.clientX - rect.left) / rect.width) * 100);
-  const y = clampPercent(((event.clientY - rect.top) / rect.height) * 100);
-  return { x, y };
-}
 
 function styleHotspotElement(el, hotspot) {
   el.style.left = `${hotspot.left}%`;
@@ -105,163 +67,6 @@ function renderHotspots() {
     button.addEventListener("click", () => handleHotspotTap(hotspot.objectId));
     hotspotStage.appendChild(button);
   });
-}
-
-function syncModeClasses() {
-  document.body.classList.toggle("debug-hotspots", debugMode);
-  document.body.classList.toggle("editor-mode", editorMode);
-  editorLayer.hidden = !editorMode;
-}
-
-function syncEditorVisibility() {
-  const showControls = debugMode;
-  editorControls.hidden = !showControls;
-
-  if (!showControls && editorMode) {
-    editorMode = false;
-    editorToggle.checked = false;
-    editorSelection.hidden = true;
-  }
-}
-
-function hotspotToConfigLine(hotspot) {
-  return `  { name: "${hotspot.name}", objectId: "${hotspot.objectId}", left: ${hotspot.left}, top: ${hotspot.top}, width: ${hotspot.width}, height: ${hotspot.height} }`;
-}
-
-function writeEditorOutput(hotspot) {
-  const valuesText = `left:${hotspot.left}% top:${hotspot.top}% width:${hotspot.width}% height:${hotspot.height}%`;
-  const configArray = `const hotspotConfig = [\n${hotspotConfig.map(hotspotToConfigLine).join(",\n")}\n];`;
-  editorOutput.textContent = `${valuesText}\n${configArray}`;
-  console.log("Hotspot percentages", hotspot);
-  console.log(configArray);
-}
-
-function beginDraw(event) {
-  if (!editorMode || event.button !== 0) return;
-  isDrawing = true;
-  dragStartPercent = calculatePercentPoint(event);
-  latestDrawnHotspot = null;
-
-  editorSelection.hidden = false;
-  editorSelection.style.left = `${dragStartPercent.x}%`;
-  editorSelection.style.top = `${dragStartPercent.y}%`;
-  editorSelection.style.width = "0%";
-  editorSelection.style.height = "0%";
-}
-
-function drawMove(event) {
-  if (!isDrawing || !dragStartPercent) return;
-
-  const current = calculatePercentPoint(event);
-  const left = Math.min(dragStartPercent.x, current.x);
-  const top = Math.min(dragStartPercent.y, current.y);
-  const width = Math.abs(current.x - dragStartPercent.x);
-  const height = Math.abs(current.y - dragStartPercent.y);
-
-  editorSelection.style.left = `${left}%`;
-  editorSelection.style.top = `${top}%`;
-  editorSelection.style.width = `${width}%`;
-  editorSelection.style.height = `${height}%`;
-}
-
-function endDraw(event) {
-  if (!isDrawing || !dragStartPercent) return;
-  isDrawing = false;
-
-  const current = calculatePercentPoint(event);
-  const left = roundPct(Math.min(dragStartPercent.x, current.x));
-  const top = roundPct(Math.min(dragStartPercent.y, current.y));
-  const width = roundPct(Math.abs(current.x - dragStartPercent.x));
-  const height = roundPct(Math.abs(current.y - dragStartPercent.y));
-
-  dragStartPercent = null;
-
-  if (width < 0.4 || height < 0.4) {
-    editorOutput.textContent = "Draw a larger rectangle to create a hotspot.";
-    editorSelection.hidden = true;
-    return;
-  }
-
-  const selectedName = hotspotNameInput.value;
-  latestDrawnHotspot = {
-    name: selectedName,
-    objectId: hotspotNameToObject[selectedName] || selectedName,
-    left,
-    top,
-    width,
-    height,
-  };
-
-  writeEditorOutput(latestDrawnHotspot);
-}
-
-function saveLatestHotspot() {
-  if (!latestDrawnHotspot) {
-    editorOutput.textContent = "Draw a hotspot first, then save.";
-    return;
-  }
-
-  const index = hotspotConfig.findIndex((hotspot) => hotspot.name === latestDrawnHotspot.name);
-  if (index >= 0) {
-    hotspotConfig[index] = latestDrawnHotspot;
-  } else {
-    hotspotConfig.push(latestDrawnHotspot);
-  }
-
-  renderHotspots();
-  persistHotspotConfig();
-  writeEditorOutput(latestDrawnHotspot);
-  editorOutput.textContent += "\nSaved locally. Refresh to verify it persists.";
-}
-
-function normalizeHotspot(hotspot) {
-  if (!hotspot || typeof hotspot !== "object") return null;
-
-  const name = typeof hotspot.name === "string" ? hotspot.name.trim() : "";
-  const objectId = typeof hotspot.objectId === "string" ? hotspot.objectId.trim() : "";
-  const left = Number(hotspot.left);
-  const top = Number(hotspot.top);
-  const width = Number(hotspot.width);
-  const height = Number(hotspot.height);
-
-  if (!name || !objectId) return null;
-  if (![left, top, width, height].every(Number.isFinite)) return null;
-
-  return {
-    name,
-    objectId,
-    left: roundPct(clampPercent(left)),
-    top: roundPct(clampPercent(top)),
-    width: roundPct(clampPercent(width)),
-    height: roundPct(clampPercent(height)),
-  };
-}
-
-function loadPersistedHotspotConfig() {
-  if (!debugMode) return;
-  try {
-    const raw = localStorage.getItem(hotspotConfigStorageKey);
-    if (!raw) return;
-
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return;
-
-    const normalized = parsed.map(normalizeHotspot).filter(Boolean);
-    if (!normalized.length) return;
-
-    hotspotConfig = normalized;
-  } catch {
-    // Ignore storage or parse failures.
-  }
-}
-
-function persistHotspotConfig() {
-  if (!debugMode) return;
-  try {
-    localStorage.setItem(hotspotConfigStorageKey, JSON.stringify(hotspotConfig));
-  } catch {
-    // Ignore storage failures in restricted browsers.
-  }
 }
 
 function loadAmbienceEnabled() {
@@ -685,28 +490,6 @@ ambienceToggle.addEventListener("click", () => {
   setAmbienceEnabled(!ambienceEnabled);
 });
 
-debugToggle.addEventListener("change", () => {
-  debugMode = debugToggle.checked;
-  syncEditorVisibility();
-  syncModeClasses();
-});
-
-editorToggle.addEventListener("change", () => {
-  if (!debugMode) {
-    editorToggle.checked = false;
-    editorMode = false;
-    return;
-  }
-
-  editorMode = editorToggle.checked;
-  editorSelection.hidden = true;
-  syncModeClasses();
-});
-
-editorLayer.addEventListener("mousedown", beginDraw);
-window.addEventListener("mousemove", drawMove);
-window.addEventListener("mouseup", endDraw);
-saveHotspotButton.addEventListener("click", saveLatestHotspot);
 
 window.addEventListener("beforeunload", () => {
   if (greetingTimer) clearTimeout(greetingTimer);
@@ -718,11 +501,7 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-loadPersistedHotspotConfig();
 renderHotspots();
-debugToggle.checked = debugMode;
-syncEditorVisibility();
-syncModeClasses();
 updatePromptHud();
 setFeedback("Take in the scene, then tap to start the game when you are ready.");
 updatePopupInstruction();

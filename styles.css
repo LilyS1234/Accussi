@@ -176,3 +176,102 @@ body {
   0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+
+.vineyard-character-wrap {
+  position: absolute;
+  left: 54%;
+  top: 35%;
+  max-width: min(40vw, 340px);
+  pointer-events: none;
+}
+
+.vineyard-bubble {
+  background: rgba(255, 255, 255, 0.95);
+  color: #3c2b13;
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  padding: 0.8rem 0.95rem;
+  box-shadow: 0 8px 20px rgba(20, 16, 9, 0.22);
+  font-size: clamp(0.9rem, 1.45vw, 1.08rem);
+  line-height: 1.32;
+}
+
+.vineyard-game-start {
+  position: absolute;
+  left: 4%;
+  bottom: 6%;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  background: rgba(40, 100, 52, 0.92);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(16, 40, 20, 0.34);
+  cursor: pointer;
+}
+
+.vineyard-game-start:disabled {
+  opacity: 0.72;
+  cursor: default;
+}
+
+.vineyard-game-panel {
+  position: absolute;
+  right: 3.5%;
+  bottom: 6%;
+  width: min(44vw, 430px);
+  background: rgba(252, 247, 236, 0.95);
+  color: #342515;
+  border-radius: 16px;
+  padding: 0.95rem 1rem;
+  box-shadow: 0 14px 30px rgba(30, 20, 12, 0.28);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.vineyard-game-panel h3 {
+  margin: 0;
+}
+
+.vineyard-game-panel p {
+  margin: 0;
+}
+
+.vineyard-game-progress {
+  font-size: 0.86rem;
+  opacity: 0.85;
+}
+
+.vineyard-game-prompt {
+  font-size: 1.06rem;
+  font-weight: 700;
+}
+
+.vineyard-baskets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.vineyard-basket {
+  border: 1px solid rgba(45, 27, 9, 0.2);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.65rem 0.55rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.vineyard-basket:hover,
+.vineyard-basket:focus-visible {
+  border-color: #7f4f24;
+  background: #f9f0df;
+}
+
+.vineyard-basket-icon {
+  font-size: 1.35rem;
+}

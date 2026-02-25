@@ -114,7 +114,6 @@ const scenes = {
   vineyard: {
     ...sceneTemplate("vineyard", "A Vigna", "Rows of vines and harvest words.", vineyardSceneImage, "racina"),
     hotspots: [
-      { type: "vocab", vocabId: "racina", label: vocabulary.racina.sicilian, left: 52, top: 58, width: 20, height: 23 },
       { type: "scene", targetSceneId: mapSceneId, label: "Torna ô paisi", left: 2, top: 4, width: 22, height: 14 },
     ],
   },

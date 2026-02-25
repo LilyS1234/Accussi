@@ -23,6 +23,7 @@ let introLandingCleanupTimer = null;
 let mapMusicAudio = null;
 let mapMusicPrimed = false;
 let mapMusicUnlockListenersAttached = false;
+let skipNextMapRevealAnimation = false;
 
 const vineyardGamePrompts = [
   {
@@ -223,6 +224,7 @@ function startLandingTransitionToMap() {
 
   stopIntroFlightSound();
   sceneStageEl.classList.add("landing-transition");
+  skipNextMapRevealAnimation = true;
 
   introLandingSwapTimer = setTimeout(() => {
     appState.currentSceneId = mapSceneId;
@@ -255,10 +257,12 @@ function renderScene() {
   if (!scene) return;
   sceneBackgroundEl.style.backgroundImage = buildBackgroundImage(scene.backgroundImage);
   const isMapScene = scene.id === mapSceneId;
-  sceneBackgroundEl.classList.toggle("map-reveal-bg", isMapScene);
+  const shouldAnimateMapReveal = isMapScene && !skipNextMapRevealAnimation;
+  sceneBackgroundEl.classList.toggle("map-reveal-bg", shouldAnimateMapReveal);
   hotspotLayerEl.classList.toggle("map-hotspots", isMapScene);
   hotspotLayerEl.classList.toggle("intro-hotspots", Boolean(scene.isIntro));
-  hotspotLayerEl.classList.toggle("map-reveal", isMapScene);
+  hotspotLayerEl.classList.toggle("map-reveal", shouldAnimateMapReveal);
+  if (isMapScene && skipNextMapRevealAnimation) skipNextMapRevealAnimation = false;
   hotspotLayerEl.innerHTML = "";
 
   if (scene.isIntro) {
@@ -535,12 +539,11 @@ function renderIntroScene() {
   const speechBubble = document.createElement("div");
   speechBubble.className = "intro-bubble";
   speechBubble.textContent = "Passengers, this is your captain speaking! Buckle your seatbelts and prepare for landing!";
-  planeWrap.appendChild(speechBubble);
-
   const plane = document.createElement("span");
   plane.className = "intro-plane";
   plane.textContent = "✈️";
   planeWrap.appendChild(plane);
+  planeWrap.appendChild(speechBubble);
 
   hotspotLayerEl.appendChild(planeWrap);
 

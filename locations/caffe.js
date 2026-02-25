@@ -7,7 +7,7 @@ const prompts = [
 
 let hotspotConfig = [
   { name: "espresso", objectId: "machine", left: 89, top: 37, width: 11, height: 17 },
-  { name: "cup", objectId: "coffee", left: 61.8, top: 49.5, width: 5.2, height: 7.2 },
+  { name: "cup", objectId: "coffee", left: 62.8, top: 43, width: 7, height: 9 },
   { name: "brioche", objectId: "brioche", left: 71, top: 47, width: 21, height: 17 },
   { name: "barista", objectId: "barista", left: 53, top: 30, width: 21, height: 28 },
 ];

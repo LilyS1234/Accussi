@@ -11,6 +11,7 @@ const vocabulary = {
 };
 
 const providedSceneImage = "assets/images/scenes/village-map-provided.png";
+const piazzaSceneImage = "assets/images/scenes/piazza.png";
 const vineyardSceneImage = "assets/images/vineyard.png";
 const introSceneId = "flight-to-sicily";
 const mapSceneId = "map";
@@ -117,7 +118,7 @@ const scenes = {
       { type: "scene", targetSceneId: mapSceneId, label: "Torna ô paisi", left: 2, top: 4, width: 22, height: 14 },
     ],
   },
-  piazza: sceneTemplate("piazza", "A Chiazza", "Water, stone, and conversation.", providedSceneImage, "acqua"),
+  piazza: sceneTemplate("piazza", "A Chiazza", "Water, stone, and conversation.", piazzaSceneImage, "acqua"),
   "lemon-grove": sceneTemplate("lemon-grove", "U Giardini di Limuna", "Trees and citrus in warm light.", providedSceneImage, "limuna"),
   "nonnas-kitchen": sceneTemplate("nonnas-kitchen", "A Cucina di Nonna", "Family cooking and home language.", providedSceneImage, "pani"),
   alimentari: sceneTemplate("alimentari", "U Negoziu", "Shopping language in the village shop.", providedSceneImage, "pani"),

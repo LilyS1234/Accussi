@@ -60,12 +60,9 @@ const vineyardGameState = {
   round: 0,
   score: 0,
   basketGrapes: 0,
-  leftBasketGrapes: 0,
-  rightBasketGrapes: 0,
   groundGrapes: 0,
   comboStreak: 0,
   maxCombo: 0,
-  nextBasketTarget: "left",
   isResolvingAnswer: false,
   prompts: [],
 };
@@ -264,7 +261,7 @@ function renderVineyardGameLauncher() {
   const startButton = document.createElement("button");
   startButton.type = "button";
   startButton.className = "vineyard-game-start";
-  startButton.textContent = vineyardGameState.isActive ? "Game Running" : "Start Dui Panara";
+  startButton.textContent = vineyardGameState.isActive ? "Game Running" : "Start Panaru";
   startButton.disabled = vineyardGameState.isActive;
   startButton.addEventListener("click", () => {
     startVineyardGame();
@@ -279,12 +276,9 @@ function startVineyardGame() {
   vineyardGameState.round = 0;
   vineyardGameState.score = 0;
   vineyardGameState.basketGrapes = 0;
-  vineyardGameState.leftBasketGrapes = 0;
-  vineyardGameState.rightBasketGrapes = 0;
   vineyardGameState.groundGrapes = 0;
   vineyardGameState.comboStreak = 0;
   vineyardGameState.maxCombo = 0;
-  vineyardGameState.nextBasketTarget = "left";
   vineyardGameState.isResolvingAnswer = false;
   vineyardGameState.prompts = shuffleArray(vineyardGamePrompts).slice(0, 5);
 }
@@ -322,9 +316,7 @@ function playVineyardTone(type) {
 function animateVineyardDrop(sourceButton, isCorrect, isGolden, pointsDelta) {
   const sourceRect = sourceButton.getBoundingClientRect();
   const layerRect = hotspotLayerEl.getBoundingClientRect();
-  const targetSelector = isCorrect
-    ? `.vineyard-drop-basket-${vineyardGameState.nextBasketTarget}`
-    : ".vineyard-drop-ground";
+  const targetSelector = isCorrect ? ".vineyard-drop-basket" : ".vineyard-drop-ground";
   const target = hotspotLayerEl.querySelector(targetSelector);
 
   if (!target) return Promise.resolve();
@@ -400,7 +392,7 @@ function renderVineyardGameOverlay() {
 
   const roundData = vineyardGameState.prompts[vineyardGameState.round];
   panel.innerHTML = `
-    <h3>Dui Panara</h3>
+    <h3>Panaru o Nterra</h3>
     <p class="vineyard-game-progress">Round ${vineyardGameState.round + 1} / ${vineyardGameState.prompts.length}</p>
     <p class="vineyard-game-prompt">${roundData.prompt}</p>
     <p class="vineyard-game-combo">Combo: <strong>x${vineyardGameState.comboStreak}</strong></p>
@@ -410,15 +402,10 @@ function renderVineyardGameOverlay() {
   const playfield = document.createElement("div");
   playfield.className = "vineyard-playfield";
   playfield.innerHTML = `
-    <div class="vineyard-drop-basket vineyard-drop-basket-left">
-      <p class="vineyard-drop-label">Panaru manca ${vineyardGameState.comboStreak >= 3 ? "😎" : "🙂"}</p>
+    <div class="vineyard-drop-basket">
+      <p class="vineyard-drop-label">Panaru ${vineyardGameState.comboStreak >= 3 ? "😎" : "🙂"}</p>
       <div class="vineyard-drop-target" aria-hidden="true">🧺</div>
-      <p class="vineyard-grape-stack">${getVineyardGrapePile(vineyardGameState.leftBasketGrapes)}</p>
-    </div>
-    <div class="vineyard-drop-basket vineyard-drop-basket-right">
-      <p class="vineyard-drop-label">Panaru dritta ${vineyardGameState.comboStreak >= 3 ? "🤩" : "🙂"}</p>
-      <div class="vineyard-drop-target" aria-hidden="true">🧺</div>
-      <p class="vineyard-grape-stack">${getVineyardGrapePile(vineyardGameState.rightBasketGrapes)}</p>
+      <p class="vineyard-grape-stack">${getVineyardGrapePile(vineyardGameState.basketGrapes)}</p>
     </div>
     <div class="vineyard-drop-ground">
       <p class="vineyard-drop-label">Nterra ${vineyardGameState.groundGrapes > 0 ? "😬" : "🌱"}</p>
@@ -454,13 +441,6 @@ function renderVineyardGameOverlay() {
         pointsDelta = grapesAwarded;
         vineyardGameState.score += pointsDelta;
         vineyardGameState.basketGrapes += grapesAwarded;
-        if (vineyardGameState.nextBasketTarget === "left") {
-          vineyardGameState.leftBasketGrapes += grapesAwarded;
-          vineyardGameState.nextBasketTarget = "right";
-        } else {
-          vineyardGameState.rightBasketGrapes += grapesAwarded;
-          vineyardGameState.nextBasketTarget = "left";
-        }
       } else {
         vineyardGameState.comboStreak = 0;
         vineyardGameState.score -= 2;

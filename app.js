@@ -18,6 +18,8 @@ const mapMusicSrc = "assets/audio/pixel-passeggiata.mp3";
 const musicPrefKey = "accussi_music_enabled";
 let introTimer = null;
 let introFlightAudio = null;
+let introLandingSwapTimer = null;
+let introLandingCleanupTimer = null;
 let mapMusicAudio = null;
 let mapMusicPrimed = false;
 let mapMusicUnlockListenersAttached = false;
@@ -131,6 +133,7 @@ const appState = { currentSceneId: introSceneId, learningState: loadLearningStat
 const sceneBackgroundEl = document.getElementById("scene-background");
 const hotspotLayerEl = document.getElementById("hotspot-layer");
 const sceneNavEl = document.getElementById("scene-nav");
+const sceneStageEl = document.getElementById("scene-stage");
 
 renderSceneNav();
 renderScene();
@@ -190,6 +193,15 @@ function renderSceneNav() {
 
 function setScene(sceneId) {
   if (!scenes[sceneId]) return;
+  const isIntroToMapTransition = appState.currentSceneId === introSceneId && sceneId === mapSceneId;
+  if (isIntroToMapTransition) {
+    startLandingTransitionToMap();
+    return;
+  }
+
+  clearLandingTransitionTimers();
+  sceneStageEl.classList.remove("landing-transition");
+
   if (introTimer) {
     clearTimeout(introTimer);
     introTimer = null;
@@ -200,6 +212,42 @@ function setScene(sceneId) {
   renderScene();
   renderSceneNav();
   updateMapMusicState();
+}
+
+function startLandingTransitionToMap() {
+  if (introLandingSwapTimer || introLandingCleanupTimer) return;
+  if (introTimer) {
+    clearTimeout(introTimer);
+    introTimer = null;
+  }
+
+  stopIntroFlightSound();
+  sceneStageEl.classList.add("landing-transition");
+
+  introLandingSwapTimer = setTimeout(() => {
+    appState.currentSceneId = mapSceneId;
+    primeMapMusicForAutoplay();
+    renderScene();
+    renderSceneNav();
+    updateMapMusicState();
+    introLandingSwapTimer = null;
+  }, 540);
+
+  introLandingCleanupTimer = setTimeout(() => {
+    sceneStageEl.classList.remove("landing-transition");
+    introLandingCleanupTimer = null;
+  }, 1180);
+}
+
+function clearLandingTransitionTimers() {
+  if (introLandingSwapTimer) {
+    clearTimeout(introLandingSwapTimer);
+    introLandingSwapTimer = null;
+  }
+  if (introLandingCleanupTimer) {
+    clearTimeout(introLandingCleanupTimer);
+    introLandingCleanupTimer = null;
+  }
 }
 
 function renderScene() {
@@ -486,7 +534,7 @@ function renderIntroScene() {
 
   const speechBubble = document.createElement("div");
   speechBubble.className = "intro-bubble";
-  speechBubble.textContent = "Buongiorno, dreamers! Captain Luminari here — we're swirling through sun-kissed clouds, so sip the sky and get ready for a grand arrival in Accussi!";
+  speechBubble.textContent = "Passengers, this is your captain speaking! Buckle your seatbelts and prepare for landing!";
   planeWrap.appendChild(speechBubble);
 
   const plane = document.createElement("span");

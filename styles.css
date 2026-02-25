@@ -250,7 +250,7 @@ body {
 
 .vineyard-baskets {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.65rem;
 }
 
@@ -288,7 +288,7 @@ body {
 
 .vineyard-playfield {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.5rem;
   align-items: end;
   background: rgba(255, 255, 255, 0.62);
@@ -326,7 +326,6 @@ body {
 }
 
 .vineyard-drop-ground {
-  grid-column: 1 / -1;
   border-top: 1px dashed rgba(80, 53, 24, 0.28);
   padding-top: 0.35rem;
 }

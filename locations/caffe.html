@@ -15,6 +15,10 @@
         <h1 class="prompt" id="prompt-sicilian">U cafè</h1>
         <p class="prompt-translation" id="prompt-english">The coffee</p>
         <p class="feedback" id="feedback">Take in the scene, then start the lesson when you're ready.</p>
+        <div class="mode-switch" role="group" aria-label="Choose game mode">
+          <button class="mode-button active" id="mode-matching" type="button" aria-pressed="true">Matching Game</button>
+          <button class="mode-button" id="mode-hotspot" type="button" aria-pressed="false">Find the Object</button>
+        </div>
         <button class="start-button" id="start-button" type="button">Tap to Start Game</button>
       </section>
 
@@ -29,7 +33,7 @@
           <div class="hotspot-stage" id="hotspot-stage"></div>
 
           <div class="barista-bubble" id="barista-bubble" role="status" aria-live="polite" hidden>
-            Bongiornu! Chi disii?
+            Bongiornu! Chi vulissi?
           </div>
         </div>
       </section>
@@ -39,6 +43,9 @@
         <p class="matching-subtitle">Match each Sicilian word with its emoji.</p>
         <div class="matching-grid" id="matching-grid"></div>
       </section>
+
+
+      <button class="result-floating-close" id="result-floating-close" type="button" aria-label="Close game dialog" hidden>Close dialog</button>
 
       <div class="result-modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
         <div class="result-card">
